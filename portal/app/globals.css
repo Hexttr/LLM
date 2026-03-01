@@ -107,14 +107,10 @@ input::placeholder {
 
 .hero-animated-bg {
   background: linear-gradient(
-    120deg,
-    #f0f9ff 0%,
-    #e0f2fe 20%,
-    #f8fafc 40%,
-    #eff6ff 60%,
-    #e0f2fe 80%,
-    #f0f9ff 100%
-  );
-  background-size: 200% 200%;
-  animation: heroGradient 14s ease infinite;
+      180deg,
+      rgba(255, 255, 255, 0.92) 0%,
+      rgba(248, 250, 252, 0.88) 50%,
+      rgba(241, 245, 249, 0.95) 100%
+    ),
+    url("/images/hero-bg.png") center / cover no-repeat;
 }

@@ -4,8 +4,8 @@
     "title": "Бесплатные модели",
     "subtitle": "Супер дёшево или бесплатный тир: чат и базовая генерация",
     "textModels": [
-      { "name": "Llama 3.1 8B / 70B", "provider": "Groq", "description": "Быстрый инференс, бесплатный тир" },
-      { "name": "Mixtral 8x7B", "provider": "Groq", "description": "Хорошее качество" },
+      { "name": "Llama 3.1 8B / 70B", "provider": "Groq", "description": "Быстрый инференс, бесплатный тир", "modelId": "groq-llama" },
+      { "name": "Mixtral 8x7B", "provider": "Groq", "description": "Хорошее качество", "modelId": "groq-llama-70b" },
       { "name": "Gemma 2", "provider": "Groq", "description": "Лёгкие модели" },
       { "name": "Gemini 2.0 Flash", "provider": "Google AI Studio", "description": "Бесплатный тир, лимиты RPD" },
       { "name": "Gemini 2.5 Flash-Lite", "provider": "Google AI Studio", "description": "Больше лимитов" },

@@ -19,6 +19,8 @@ interface ModelItem {
   name: string;
   provider?: string;
   description?: string;
+  /** Ключ модели для API (для перехода в чат) */
+  modelId?: string;
 }
 
 interface TierData {
@@ -66,44 +68,51 @@ function ModelCard({
   item: ModelItem;
   accentColor: string;
 }) {
+  const href = `/chat?model=${encodeURIComponent(item.modelId ?? item.name)}`;
   return (
-    <Box
-      p={4}
-      borderRadius="12px"
-      border="1px solid #e5e7eb"
-      bg="#ffffff"
-      boxShadow="0 1px 3px rgba(0,0,0,0.04)"
-      transition="all 0.2s ease"
-      _hover={{
-        borderColor: accentColor,
-        boxShadow: `0 4px 12px ${accentColor}20`,
-        transform: "translateY(-1px)",
-      }}
-    >
-      <Text fontWeight="700" color="#111827" fontSize="0.9375rem" lineHeight="1.3">
-        {item.name}
-      </Text>
-      {item.provider && (
-        <Box
-          mt={2}
-          display="inline-block"
-          px={2}
-          py={0.5}
-          borderRadius="6px"
-          bg="#f3f4f6"
-          fontSize="xs"
-          color="#6b7280"
-          fontWeight="500"
-        >
-          {item.provider}
-        </Box>
-      )}
-      {item.description && (
-        <Text fontSize="xs" color="#4b5563" mt={2} lineHeight="1.45">
-          {item.description}
+    <Link href={href} style={{ display: "block" }}>
+      <Box
+        p={4}
+        borderRadius="12px"
+        border="1px solid #e5e7eb"
+        bg="#ffffff"
+        boxShadow="0 1px 3px rgba(0,0,0,0.04)"
+        transition="all 0.2s ease"
+        _hover={{
+          borderColor: accentColor,
+          boxShadow: `0 6px 16px ${accentColor}25`,
+          transform: "translateY(-2px)",
+        }}
+        cursor="pointer"
+      >
+        <Text fontWeight="700" color="#111827" fontSize="0.9375rem" lineHeight="1.3">
+          {item.name}
         </Text>
-      )}
-    </Box>
+        {item.provider && (
+          <Box
+            mt={2}
+            display="inline-block"
+            px={2}
+            py={0.5}
+            borderRadius="6px"
+            bg="#f3f4f6"
+            fontSize="xs"
+            color="#6b7280"
+            fontWeight="500"
+          >
+            {item.provider}
+          </Box>
+        )}
+        {item.description && (
+          <Text fontSize="xs" color="#4b5563" mt={2} lineHeight="1.45">
+            {item.description}
+          </Text>
+        )}
+        <Text fontSize="xs" color={accentColor} mt={2} fontWeight="500">
+          Открыть в чате →
+        </Text>
+      </Box>
+    </Link>
   );
 }
 
@@ -203,24 +212,25 @@ export default function Home() {
         w="100%"
         className="hero-animated-bg"
         position="relative"
-        borderBottom="1px solid #e2e8f0"
-        pt={{ base: 10, md: 14 }}
-        pb={{ base: 12, md: 16 }}
+        borderBottom="1px solid rgba(226, 232, 240, 0.8)"
+        pt={{ base: 12, md: 16 }}
+        pb={{ base: 14, md: 20 }}
       >
         <Container maxW="1200px" w="100%" mx="auto" px={4}>
-          <Box textAlign="center" maxW="640px" mx="auto">
+          <Box textAlign="center" maxW="600px" mx="auto">
             <Heading
               size="2xl"
               color="#0f172a"
               fontSize={{ base: "1.75rem", md: "2.25rem" }}
               fontWeight="800"
-              letterSpacing="-0.025em"
-              lineHeight="1.2"
-              mb={4}
+              letterSpacing="-0.03em"
+              lineHeight="1.25"
+              mb={3}
+              textShadow="0 1px 2px rgba(255,255,255,0.8)"
             >
               Пользуйся всеми моделями ИИ без VPN
             </Heading>
-            <Text fontSize="lg" color="#475569" lineHeight="1.65" mb={8}>
+            <Text fontSize="lg" color="#475569" lineHeight="1.6" mb={8} fontWeight="500">
               Общий рублёвый счёт и старт за 5 минут.
             </Text>
             <Flex gap={3} justify="center" flexWrap="wrap">
@@ -263,19 +273,20 @@ export default function Home() {
       </Box>
 
       {/* Каталог моделей */}
-      <Container maxW="1200px" w="100%" mx="auto" py={{ base: 10, md: 14 }} px={4}>
+      <Container maxW="1200px" w="100%" mx="auto" py={{ base: 12, md: 16 }} px={4}>
         <Heading
           size="lg"
           textAlign="center"
           color="#0f172a"
-          fontSize="1.5rem"
-          fontWeight="700"
+          fontSize="1.625rem"
+          fontWeight="800"
+          letterSpacing="-0.02em"
           mb={2}
         >
           Каталог моделей
         </Heading>
-        <Text textAlign="center" color="#64748b" fontSize="sm" mb={8}>
-          Выберите категорию — ниже отобразятся модели этого блока
+        <Text textAlign="center" color="#64748b" fontSize="sm" mb={10}>
+          Выберите категорию — ниже отобразятся модели. Клик по модели откроет чат.
         </Text>
 
         {loading && (
@@ -303,11 +314,11 @@ export default function Home() {
 
             {selectedTier && (
               <Box
-                borderRadius="16px"
+                borderRadius="20px"
                 border="1px solid #e5e7eb"
-                bg="#fafbfc"
+                bg="#ffffff"
                 overflow="hidden"
-                boxShadow="0 4px 20px rgba(0,0,0,0.06)"
+                boxShadow="0 4px 24px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)"
               >
                 <Box px={6} py={5}>
                   <Flex align="center" gap={2} mb={4}>
@@ -362,14 +373,26 @@ export default function Home() {
             )}
 
             {!selectedTier && (
-              <Text textAlign="center" color="#94a3b8" fontSize="sm" py={8}>
-                Нажмите на карточку выше, чтобы увидеть модели категории
-              </Text>
+              <Box
+                textAlign="center"
+                py={12}
+                px={6}
+                borderRadius="16px"
+                border="1px dashed #e2e8f0"
+                bg="#f8fafc"
+              >
+                <Text color="#94a3b8" fontSize="sm" mb={1}>
+                  Выберите категорию выше
+                </Text>
+                <Text color="#cbd5e1" fontSize="xs">
+                  Модели появятся здесь — клик откроет чат с выбранной моделью
+                </Text>
+              </Box>
             )}
           </>
         )}
 
-        <Box mt={14} textAlign="center">
+        <Box mt={16} pt={8} borderTop="1px solid #e2e8f0" textAlign="center">
           <Link href="/dashboard">
             <Button
               variant="ghost"

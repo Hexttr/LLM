@@ -55,20 +55,6 @@ export function Navbar() {
         </Link>
 
         <Flex align="center" gap={2} flexWrap="wrap" justify="flex-end">
-          <Link href="/chat">
-            <Button
-              size="sm"
-              variant="ghost"
-              color="#4b5563"
-              fontWeight="500"
-              borderRadius="8px"
-              _hover={{ bg: "#f3f4f6", color: "#111827" }}
-              px={4}
-            >
-              Попробовать
-            </Button>
-          </Link>
-
           {showLoggedOut && (
             <>
               <Link href="/login">

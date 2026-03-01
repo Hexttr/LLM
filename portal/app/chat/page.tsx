@@ -11,7 +11,7 @@ import {
   Textarea,
 } from "@chakra-ui/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
 
 const STORAGE_KEY = "portal_chat_dialogs";
@@ -53,6 +53,8 @@ function saveDialogsToStorage(dialogs: SavedDialog[]) {
 }
 
 export default function ChatPage() {
+  const searchParams = useSearchParams();
+  const modelFromUrl = searchParams.get("model");
   const [models, setModels] = useState<Model[]>([]);
   const [selectedModel, setSelectedModel] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -73,11 +75,17 @@ export default function ChatPage() {
       .then((d) => {
         const list = d.models ?? [];
         setModels(list);
-        if (list.length > 0 && !selectedModel) setSelectedModel(list[0].model_name);
+        const toSelect =
+          modelFromUrl && list.some((m) => m.model_name === modelFromUrl)
+            ? modelFromUrl
+            : list.length > 0
+              ? list[0].model_name
+              : "";
+        if (toSelect) setSelectedModel(toSelect);
       })
       .catch(() => setModels([]))
       .finally(() => setLoadingModels(false));
-  }, []);
+  }, [modelFromUrl]);
 
   useEffect(() => {
     if (models.length > 0 && !selectedModel) setSelectedModel(models[0].model_name);
