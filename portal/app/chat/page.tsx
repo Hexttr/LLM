@@ -422,7 +422,7 @@ export default function ChatPage() {
             onDragLeave={onDragLeave}
             onDrop={onDrop}
           >
-            {/* Строка: селектор модели + История + Новый диалог */}
+            {/* Строка: 50% селектор модели | 50% История + Новый диалог */}
             <Box p={4} flexShrink={0} position="relative">
               {loadingModels ? (
                 <Flex align="center" gap={2}>
@@ -430,7 +430,7 @@ export default function ChatPage() {
                   <Text fontSize="14px" color="var(--foreground-muted)">Загрузка моделей...</Text>
                 </Flex>
               ) : (
-                <Flex align="center" gap={3} flexWrap="wrap">
+                <Flex align="center" gap={4} w="100%">
                   <Flex
                     align="center"
                     gap={3}
@@ -440,8 +440,8 @@ export default function ChatPage() {
                     bg="var(--chat-card-bg)"
                     cursor="pointer"
                     onClick={() => setModelSelectOpen((o) => !o)}
-                    flex={1}
-                    minW="200px"
+                    flex="1"
+                    minW={0}
                     sx={{ _hover: { borderColor: "#2563eb" } }}
                   >
                     <Box as="span" fontSize="20px" color="#2563eb">⚡</Box>
@@ -449,11 +449,11 @@ export default function ChatPage() {
                       <Text fontWeight="600" fontSize="16px" color="var(--foreground)" noOfLines={1}>
                         {displayModelName || "Выберите модель"}
                       </Text>
-                      <Text fontSize="13px" color="var(--foreground-muted)">{providerLabel}</Text>
+                      <Text fontSize="13px" color="var(--foreground-muted)" noOfLines={1}>{providerLabel}</Text>
                     </Box>
-                    <Box as="span" fontSize="12px" color="var(--foreground-muted)" transform={modelSelectOpen ? "rotate(180deg)" : undefined} transition="transform 0.2s">▼</Box>
+                    <Box as="span" fontSize="12px" color="var(--foreground-muted)" flexShrink={0} transform={modelSelectOpen ? "rotate(180deg)" : undefined} transition="transform 0.2s">▼</Box>
                   </Flex>
-                  <Flex align="center" gap={3} color="var(--foreground-muted)" fontSize="14px">
+                  <Flex align="center" justify="flex-end" gap={4} color="var(--foreground-muted)" fontSize="14px" flex="1" minW={0}>
                     <Box
                       as="button"
                       type="button"
@@ -551,11 +551,14 @@ export default function ChatPage() {
             {/* Лента сообщений */}
             <Box
               flex="1"
+              minH={0}
               overflowY="auto"
+              overflowX="hidden"
               p={5}
               display="flex"
               flexDirection="column"
               gap={4}
+              className="chat-messages-scroll"
             >
               {messages.length > 0 && (
                 <Text fontSize="13px" color="var(--foreground-muted)" mb={1}>
@@ -717,7 +720,7 @@ export default function ChatPage() {
               <div ref={bottomRef} />
             </Box>
 
-            {/* Поле ввода: скрепка | поле | круглая кнопка отправки */}
+            {/* Поле ввода: скрепка | однострочное поле | стрелка */}
             <Box
               p={4}
               borderTop="1px solid var(--chat-card-border)"
@@ -725,13 +728,16 @@ export default function ChatPage() {
               bg="var(--chat-card-bg)"
               transition="background-color 0.2s ease, border-color 0.2s ease"
             >
-              <Flex align="flex-end" gap={2} mb={2}>
+              <Flex align="center" gap={3}>
                 <Box
                   flexShrink={0}
                   color="var(--foreground-muted)"
                   title="Прикрепить файл"
                   display="flex"
                   alignItems="center"
+                  justifyContent="center"
+                  w="40px"
+                  h="40px"
                   sx={{ _hover: { color: "var(--foreground)" } }}
                 >
                   <IconPaperclip />
@@ -747,11 +753,13 @@ export default function ChatPage() {
                     }
                   }}
                   placeholder="Напишите сообщение..."
-                  minH="44px"
-                  maxH="160px"
+                  rows={1}
+                  minH="40px"
+                  maxH="40px"
                   borderRadius="12px"
-                  padding="12px 16px"
+                  padding="10px 16px"
                   fontSize="15px"
+                  lineHeight="1.4"
                   resize="none"
                   flex={1}
                   aria-label="Введите сообщение"
@@ -768,12 +776,11 @@ export default function ChatPage() {
                 />
                 <Button
                   onClick={send}
-                  size="lg"
                   loading={loading}
                   disabled={!input.trim() || !selectedModel}
-                  w="48px"
-                  h="48px"
-                  minW="48px"
+                  w="40px"
+                  h="40px"
+                  minW="40px"
                   borderRadius="full"
                   bg="#2563eb"
                   color="white"
