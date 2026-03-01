@@ -551,10 +551,6 @@ export default function ChatPage() {
               )}
             </Box>
 
-            {/* Подсказка про drag-and-drop — по центру под селектором */}
-            <Text textAlign="center" fontSize="13px" color="var(--foreground-subtle)" py={1} flexShrink={0}>
-              Можно перетащить файлы в чат — их содержимое будет отправлено с сообщением.
-            </Text>
             {isDragOver && (
               <Box
                 position="absolute"
@@ -772,8 +768,8 @@ export default function ChatPage() {
                       send();
                     }
                   }}
-                  placeholder="Напишите сообщение... (Enter — отправить, Shift+Enter — новая строка)"
-                  minH="48px"
+                  placeholder="Напишите сообщение..."
+                  minH="44px"
                   maxH="160px"
                   borderRadius="12px"
                   padding="12px 16px"
@@ -808,12 +804,9 @@ export default function ChatPage() {
                   sx={{ _hover: { bg: "#1d4ed8" } }}
                   aria-label="Отправить"
                 >
-                  ✈️
+                  →
                 </Button>
               </Flex>
-              <Text fontSize="12px" color="var(--foreground-subtle)" textAlign="center">
-                Enter — отправить, Shift+Enter — новая строка
-              </Text>
             </Box>
           </Box>
         </Container>
