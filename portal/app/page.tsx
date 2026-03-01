@@ -470,6 +470,179 @@ export default function Home() {
         </Box>
       </Container>
       </Box>
+
+      {/* Почему 21day.club? */}
+      <Box w="100%" py={{ base: 14, md: 20 }} px={4} bg="#f8fafc">
+        <Container maxW="1200px" w="100%" mx="auto">
+          <Heading
+            textAlign="center"
+            fontSize={{ base: "1.75rem", md: "2rem" }}
+            fontWeight="800"
+            color="#0f172a"
+            mb={2}
+          >
+            Почему 21day.club?
+          </Heading>
+          <Text textAlign="center" color="#64748b" fontSize="lg" mb={10}>
+            Единая платформа для работы со всеми моделями ИИ.
+          </Text>
+          <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} gap={6}>
+            {[
+              { icon: "◉", title: "Без VPN", desc: "Прямой доступ ко всем моделям из России. Никаких прокси и обходов." },
+              { icon: "▣", title: "Рублёвый счёт", desc: "Оплата в рублях. Единый баланс для всех провайдеров и моделей." },
+              { icon: "↻", title: "Мгновенный старт", desc: "Регистрация за 30 секунд. Начните с бесплатных моделей прямо сейчас." },
+              { icon: "◆", title: "Безопасность", desc: "Ваши данные не сохраняются. Прозрачная политика и шифрование." },
+            ].map((item) => (
+              <Box
+                key={item.title}
+                p={6}
+                borderRadius="12px"
+                bg="white"
+                border="1px solid #e2e8f0"
+                boxShadow="0 1px 3px rgba(0,0,0,0.04)"
+              >
+                <Flex
+                  w="48px"
+                  h="48px"
+                  borderRadius="10px"
+                  bg="rgba(37, 99, 235, 0.12)"
+                  border="1px solid rgba(37, 99, 235, 0.25)"
+                  align="center"
+                  justify="center"
+                  mb={4}
+                  fontSize="24px"
+                  color="#1d4ed8"
+                >
+                  {item.icon}
+                </Flex>
+                <Heading size="sm" color="#0f172a" fontSize="1.1rem" fontWeight="700" mb={2}>
+                  {item.title}
+                </Heading>
+                <Text color="#64748b" fontSize="sm" lineHeight="1.5">
+                  {item.desc}
+                </Text>
+              </Box>
+            ))}
+          </SimpleGrid>
+        </Container>
+      </Box>
+
+      {/* Готовы начать? */}
+      <Box w="100%" py={{ base: 14, md: 20 }} px={4}>
+        <Container maxW="1200px" w="100%" mx="auto">
+          <Box
+            p={{ base: 8, md: 12 }}
+            borderRadius="16px"
+            bg="white"
+            border="1px solid #e2e8f0"
+            boxShadow="0 4px 24px rgba(0,0,0,0.06)"
+            textAlign="center"
+          >
+            <Heading fontSize={{ base: "1.5rem", md: "1.75rem" }} fontWeight="800" color="#0f172a" mb={3}>
+              Готовы начать?
+            </Heading>
+            <Text color="#64748b" fontSize="lg" lineHeight="1.6" mb={8} maxW="520px" mx="auto">
+              Создайте аккаунт за 30 секунд и получите доступ ко всем бесплатным моделям прямо сейчас.
+            </Text>
+            <Flex gap={3} justify="center" flexWrap="wrap">
+              <Link href="/register">
+                <Button
+                  size="lg"
+                  height="48px"
+                  px={8}
+                  fontSize="16px"
+                  fontWeight="600"
+                  borderRadius="10px"
+                  bg="#2563eb"
+                  color="white"
+                  _hover={{ bg: "#1d4ed8" }}
+                  boxShadow="0 2px 8px rgba(37, 99, 235, 0.35)"
+                >
+                  Начать бесплатно →
+                </Button>
+              </Link>
+              <Link href="#">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  height="48px"
+                  px={8}
+                  fontSize="16px"
+                  fontWeight="600"
+                  borderRadius="10px"
+                  borderWidth="2px"
+                  borderColor="#e2e8f0"
+                  color="#334155"
+                  bg="white"
+                  _hover={{ bg: "#f8fafc", borderColor: "#cbd5e1" }}
+                >
+                  Связаться с нами
+                </Button>
+              </Link>
+            </Flex>
+          </Box>
+        </Container>
+      </Box>
+
+      {/* Footer */}
+      <Box
+        as="footer"
+        w="100%"
+        py={8}
+        px={4}
+        bg="#f1f5f9"
+        borderTop="1px solid #e2e8f0"
+      >
+        <Container maxW="1200px" w="100%" mx="auto">
+          <Flex
+            direction={{ base: "column", md: "row" }}
+            align={{ base: "center", md: "center" }}
+            justify="space-between"
+            gap={6}
+          >
+            <Link href="/" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <Flex
+                w="40px"
+                h="40px"
+                borderRadius="full"
+                bg="#2563eb"
+                align="center"
+                justify="center"
+                color="white"
+                fontSize="18px"
+                fontWeight="800"
+              >
+                S
+              </Flex>
+              <Box>
+                <Text fontWeight="800" fontSize="1.15rem" color="#0f172a">
+                  21day
+                </Text>
+                <Text fontSize="0.9rem" color="#64748b" fontWeight="500">
+                  club
+                </Text>
+              </Box>
+            </Link>
+            <Flex gap={8} flexWrap="wrap" justify="center">
+              <Link href="#catalog" style={{ color: "#475569", fontWeight: "500", fontSize: "15px" }}>
+                Каталог
+              </Link>
+              <Link href="#catalog" style={{ color: "#475569", fontWeight: "500", fontSize: "15px" }}>
+                Тарифы
+              </Link>
+              <Link href="#" style={{ color: "#475569", fontWeight: "500", fontSize: "15px" }}>
+                Документация
+              </Link>
+              <Link href="#" style={{ color: "#475569", fontWeight: "500", fontSize: "15px" }}>
+                Поддержка
+              </Link>
+            </Flex>
+            <Text color="#94a3b8" fontSize="14px">
+              © 2026 21day.club
+            </Text>
+          </Flex>
+        </Container>
+      </Box>
     </Box>
   );
 }
