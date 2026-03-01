@@ -309,61 +309,36 @@ export default function ChatPage() {
     >
       <Navbar />
 
-      {/* Шапка чата: лого + Чат | История, Новый диалог, тема, В кабинет */}
-      <Box
-        borderBottom="1px solid var(--chat-card-border)"
-        bg="var(--chat-card-bg)"
-        py={3}
-        px={4}
-        flexShrink={0}
-      >
+      {/* Вторичная шапка: ⚡ 21day.club Чат | ссылки */}
+      <Box borderBottom="1px solid var(--chat-card-border)" bg="var(--chat-card-bg)" py={2.5} px={4} flexShrink={0}>
         <Flex maxW="900px" mx="auto" justify="space-between" align="center" flexWrap="wrap" gap={3}>
-          <Flex align="center" gap={3}>
-            <Link href="/" style={{ textDecoration: "none" }}>
-              <Flex align="center" gap={2}>
-                <Box as="span" fontSize="20px" color="#2563eb">⚡</Box>
-                <Text fontWeight="700" fontSize="18px" color="var(--foreground)">21day.club</Text>
-              </Flex>
-            </Link>
-            <Text color="var(--foreground-muted)" fontSize="15px" fontWeight="500">Чат</Text>
+          <Flex align="center" gap={2}>
+            <Box as="span" fontSize="18px" color="#2563eb">⚡</Box>
+            <Text fontWeight="600" fontSize="15px" color="var(--foreground)">21day.club Чат</Text>
           </Flex>
-          <Flex align="center" gap={2} flexWrap="wrap">
-            <Button
-              size="sm"
-              variant="ghost"
+          <Flex align="center" gap={4} color="var(--foreground-muted)" fontSize="14px">
+            <Box
+              as="button"
+              type="button"
               onClick={() => setShowHistory((v) => !v)}
-              leftIcon={<Box as="span" fontSize="14px">↻</Box>}
-              sx={{ color: "var(--foreground-muted)", _hover: { bg: "var(--chat-history-item-hover)" } }}
+              sx={{ _hover: { color: "var(--foreground)" } }}
             >
               История{savedDialogs.length > 0 ? ` ${savedDialogs.length}` : ""}
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={clearChat}
-              leftIcon={<Box as="span" fontSize="14px">+</Box>}
-              sx={{ color: "var(--foreground-muted)", _hover: { bg: "var(--chat-history-item-hover)" } }}
-            >
+            </Box>
+            <Box as="button" type="button" onClick={clearChat} sx={{ _hover: { color: "var(--foreground)" } }}>
               Новый диалог
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
+            </Box>
+            <Box
+              as="button"
+              type="button"
               onClick={() => setTheme(theme === "light" ? "dark" : "light")}
               aria-label={theme === "light" ? "Тёмная тема" : "Светлая тема"}
-              sx={{ color: "var(--foreground-muted)", _hover: { bg: "var(--chat-history-item-hover)" } }}
+              sx={{ _hover: { color: "var(--foreground)" } }}
             >
-              {theme === "light" ? "☀" : "🌙"}
-            </Button>
-            <Link href="/dashboard">
-              <Button
-                size="sm"
-                variant="ghost"
-                leftIcon={<Box as="span" fontSize="14px">←</Box>}
-                sx={{ color: "var(--foreground-muted)", _hover: { bg: "var(--chat-history-item-hover)" } }}
-              >
-                В кабинет
-              </Button>
+              ★
+            </Box>
+            <Link href="/dashboard" style={{ color: "inherit" }}>
+              <Box as="span" sx={{ _hover: { color: "var(--foreground)" } }}>В кабинет</Box>
             </Link>
           </Flex>
         </Flex>
@@ -440,102 +415,106 @@ export default function ChatPage() {
             </Box>
           )}
 
-          {/* Селектор модели — карточка с иконкой и выпадающим списком */}
-          <Box mb={4} flexShrink={0} position="relative">
-            {loadingModels ? (
-              <Flex align="center" gap={2} p={3}>
-                <Spinner size="sm" color="blue.500" />
-                <Text fontSize="14px" color="var(--foreground-muted)">Загрузка моделей...</Text>
-              </Flex>
-            ) : (
-              <>
-                <Flex
-                  align="center"
-                  gap={3}
-                  p={3}
-                  borderRadius="12px"
-                  border="1px solid var(--chat-card-border)"
-                  bg="var(--chat-card-bg)"
-                  cursor="pointer"
-                  onClick={() => setModelSelectOpen((o) => !o)}
-                  sx={{ _hover: { borderColor: "#2563eb" } }}
-                >
-                  <Box as="span" fontSize="20px" color="#2563eb">⚡</Box>
-                  <Box flex={1} minW={0}>
-                    <Text fontWeight="600" fontSize="16px" color="var(--foreground)" noOfLines={1}>
-                      {displayModelName || "Выберите модель"}
-                    </Text>
-                    <Text fontSize="13px" color="var(--foreground-muted)">{providerLabel}</Text>
-                  </Box>
-                  <Box as="span" fontSize="14px" color="var(--foreground-muted)" transform={modelSelectOpen ? "rotate(180deg)" : undefined} transition="transform 0.2s">▼</Box>
-                </Flex>
-                {modelSelectOpen && (
-                  <>
-                    <Box position="fixed" inset={0} zIndex={9} onClick={() => setModelSelectOpen(false)} />
-                    <Box
-                      position="absolute"
-                      top="100%"
-                      left={0}
-                      right={0}
-                      mt={1}
-                      py={1}
-                      borderRadius="8px"
-                      bg="var(--chat-card-bg)"
-                      border="1px solid var(--chat-card-border)"
-                      boxShadow="lg"
-                      zIndex={10}
-                      maxH="240px"
-                      overflowY="auto"
-                    >
-                      {models.map((m) => (
-                        <Box
-                          key={m.model_name}
-                          px={3}
-                          py={2}
-                          cursor="pointer"
-                          onClick={() => {
-                            setSelectedModel(m.model_name);
-                            setModelSelectOpen(false);
-                          }}
-                          sx={{ _hover: { bg: "var(--chat-history-item-hover)" } }}
-                        >
-                          <Text fontSize="14px" fontWeight="500" color="var(--foreground)">{m.model_name}</Text>
-                        </Box>
-                      ))}
-                    </Box>
-                  </>
-                )}
-              </>
-            )}
-            {attachedFiles.length > 0 && (
-              <Flex align="center" gap={2} mt={2} flexWrap="wrap">
-                <Text fontSize="13px" color="var(--foreground-muted)">
-                  Прикреплено: {attachedFiles.map((f) => f.name).join(", ")}
-                </Text>
-                <Button size="xs" variant="ghost" color="var(--foreground-subtle)" onClick={clearAttached}>
-                  Убрать
-                </Button>
-              </Flex>
-            )}
-          </Box>
-
-          {/* Карточка чата (зона drag & drop) */}
+          {/* Одна панель чата: фон #F7FAFC, внутри — селектор, подсказка, контент, ввод */}
           <Box
             flex="1"
             display="flex"
             flexDirection="column"
             minH={0}
             borderRadius="16px"
-            bg="var(--chat-card-bg)"
+            bg="var(--chat-panel-bg)"
             border="1px solid var(--chat-card-border)"
             boxShadow="var(--chat-card-shadow)"
             overflow="hidden"
-            transition="background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease"
+            transition="background-color 0.2s ease, border-color 0.2s ease"
             position="relative"
             onDragOver={onDragOver}
             onDragLeave={onDragLeave}
             onDrop={onDrop}
           >
+            {/* Селектор модели — белая карточка вверху панели */}
+            <Box p={4} flexShrink={0} position="relative">
+              {loadingModels ? (
+                <Flex align="center" gap={2}>
+                  <Spinner size="sm" color="blue.500" />
+                  <Text fontSize="14px" color="var(--foreground-muted)">Загрузка моделей...</Text>
+                </Flex>
+              ) : (
+                <>
+                  <Flex
+                    align="center"
+                    gap={3}
+                    p={3}
+                    borderRadius="12px"
+                    border="1px solid var(--chat-card-border)"
+                    bg="var(--chat-card-bg)"
+                    cursor="pointer"
+                    onClick={() => setModelSelectOpen((o) => !o)}
+                    sx={{ _hover: { borderColor: "#2563eb" } }}
+                  >
+                    <Box as="span" fontSize="20px" color="#2563eb">⚡</Box>
+                    <Box flex={1} minW={0}>
+                      <Text fontWeight="600" fontSize="16px" color="var(--foreground)" noOfLines={1}>
+                        {displayModelName || "Выберите модель"}
+                      </Text>
+                      <Text fontSize="13px" color="var(--foreground-muted)">{providerLabel}</Text>
+                    </Box>
+                    <Box as="span" fontSize="12px" color="var(--foreground-muted)" transform={modelSelectOpen ? "rotate(180deg)" : undefined} transition="transform 0.2s">▼</Box>
+                  </Flex>
+                  {modelSelectOpen && (
+                    <>
+                      <Box position="fixed" inset={0} zIndex={9} onClick={() => setModelSelectOpen(false)} />
+                      <Box
+                        position="absolute"
+                        top="100%"
+                        left={4}
+                        right={4}
+                        mt={1}
+                        py={1}
+                        borderRadius="8px"
+                        bg="var(--chat-card-bg)"
+                        border="1px solid var(--chat-card-border)"
+                        boxShadow="lg"
+                        zIndex={10}
+                        maxH="240px"
+                        overflowY="auto"
+                      >
+                        {models.map((m) => (
+                          <Box
+                            key={m.model_name}
+                            px={3}
+                            py={2}
+                            cursor="pointer"
+                            onClick={() => {
+                              setSelectedModel(m.model_name);
+                              setModelSelectOpen(false);
+                            }}
+                            sx={{ _hover: { bg: "var(--chat-history-item-hover)" } }}
+                          >
+                            <Text fontSize="14px" fontWeight="500" color="var(--foreground)">{m.model_name}</Text>
+                          </Box>
+                        ))}
+                      </Box>
+                    </>
+                  )}
+                </>
+              )}
+              {attachedFiles.length > 0 && (
+                <Flex align="center" gap={2} mt={2} flexWrap="wrap">
+                  <Text fontSize="13px" color="var(--foreground-muted)">
+                    Прикреплено: {attachedFiles.map((f) => f.name).join(", ")}
+                  </Text>
+                  <Button size="xs" variant="ghost" color="var(--foreground-subtle)" onClick={clearAttached}>
+                    Убрать
+                  </Button>
+                </Flex>
+              )}
+            </Box>
+
+            {/* Подсказка про drag-and-drop — по центру под селектором */}
+            <Text textAlign="center" fontSize="13px" color="var(--foreground-subtle)" py={1} flexShrink={0}>
+              Можно перетащить файлы в чат — их содержимое будет отправлено с сообщением.
+            </Text>
             {isDragOver && (
               <Box
                 position="absolute"
@@ -571,21 +550,25 @@ export default function ChatPage() {
               )}
 
               {messages.length === 0 && !loading && (
-                <Flex flexDirection="column" align="center" justify="center" py={8} textAlign="center">
-                  <Box as="span" fontSize="48px" color="#2563eb" mb={4} opacity={0.9} lineHeight={1}>
+                <Flex flexDirection="column" align="center" justify="center" py={6} textAlign="center">
+                  <Box as="span" fontSize="40px" color="#2563eb" mb={3} opacity={0.9} lineHeight={1}>
                     💬
                   </Box>
                   <Heading size="md" color="var(--foreground)" mb={2} fontWeight="600">
                     Начните разговор
                   </Heading>
-                  <Text color="var(--chat-empty-text)" fontSize="15px" mb={2} maxW="380px" lineHeight="1.6">
+                  <Text color="var(--chat-empty-text)" fontSize="14px" mb={5} maxW="360px" lineHeight="1.6">
                     Напишите сообщение — диалог сохраняет контекст.
                   </Text>
-                  <Text color="var(--foreground-subtle)" fontSize="13px" mb={6}>
-                    Можно перетащить файлы в чат — их содержимое будет отправлено с сообщением.
-                  </Text>
-                  <Flex flexWrap="wrap" gap={3} justify="center" maxW="520px">
-                    {SUGGESTION_CARDS.map((card) => (
+                  <Box
+                    display="grid"
+                    gridTemplateColumns={{ base: "1fr", md: "1fr 1fr" }}
+                    gap={3}
+                    w="100%"
+                    maxW="560px"
+                    mx="auto"
+                  >
+                    {SUGGESTION_CARDS.map((card, idx) => (
                       <Box
                         key={card.title}
                         as="button"
@@ -595,23 +578,26 @@ export default function ChatPage() {
                         p={4}
                         borderRadius="12px"
                         border="1px solid var(--chat-card-border)"
-                        bg="var(--chat-prompt-btn-bg)"
+                        bg="var(--chat-card-bg)"
                         cursor="pointer"
                         transition="all 0.2s"
+                        gridColumn={idx === 2 || idx === 3 ? undefined : { base: "1", md: "1 / -1" }}
+                        maxW={idx === 2 || idx === 3 ? undefined : { md: "320px" }}
+                        justifySelf={idx === 2 || idx === 3 ? undefined : "center"}
                         sx={{
                           _hover: {
                             borderColor: "#2563eb",
                             bg: "var(--chat-prompt-btn-hover-bg)",
-                            transform: "translateY(-1px)",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
                           },
                         }}
                       >
-                        <Text fontSize="18px" mb={2}>{card.icon}</Text>
+                        <Text fontSize="16px" mb={2}>{card.icon}</Text>
                         <Text fontWeight="600" fontSize="14px" color="var(--foreground)" mb={1}>{card.title}</Text>
                         <Text fontSize="13px" color="var(--foreground-muted)" lineHeight="1.4">{card.prompt}</Text>
                       </Box>
                     ))}
-                  </Flex>
+                  </Box>
                 </Flex>
               )}
 
@@ -754,10 +740,11 @@ export default function ChatPage() {
                   bg="#2563eb"
                   color="white"
                   flexShrink={0}
+                  fontSize="18px"
                   sx={{ _hover: { bg: "#1d4ed8" } }}
                   aria-label="Отправить"
                 >
-                  ➤
+                  ✈️
                 </Button>
               </Flex>
               <Text fontSize="12px" color="var(--foreground-subtle)" textAlign="center">

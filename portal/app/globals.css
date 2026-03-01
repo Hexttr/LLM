@@ -47,10 +47,11 @@ a {
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
   /* Чат */
-  --chat-page-bg: #e2e8f0;
+  --chat-page-bg: #ffffff;
+  --chat-panel-bg: #f7fafc;
   --chat-card-bg: #ffffff;
   --chat-card-border: #e2e8f0;
-  --chat-card-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  --chat-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   --chat-bubble-user-bg: #2563eb;
   --chat-bubble-user-color: #ffffff;
   --chat-bubble-user-border: #1d4ed8;
@@ -98,6 +99,7 @@ a {
 
   /* Чат */
   --chat-page-bg: #0f172a;
+  --chat-panel-bg: #1e293b;
   --chat-card-bg: #1e293b;
   --chat-card-border: #334155;
   --chat-card-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
