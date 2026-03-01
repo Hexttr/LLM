@@ -1,0 +1,33 @@
+# LiteLLM Proxy — конфигурация моделей и настроек
+# Документация: https://docs.litellm.ai/docs/proxy/configs
+
+model_list:
+  # Пример: OpenAI (раскомментируйте и задайте OPENAI_API_KEY в .env)
+  # - model_name: gpt-4o
+  #   litellm_params:
+  #     model: openai/gpt-4o
+  #     api_key: os.environ/OPENAI_API_KEY
+  # - model_name: gpt-4o-mini
+  #   litellm_params:
+  #     model: openai/gpt-4o-mini
+  #     api_key: os.environ/OPENAI_API_KEY
+
+  # Пример: Anthropic
+  # - model_name: claude-3-5-sonnet
+  #   litellm_params:
+  #     model: anthropic/claude-3-5-sonnet-20241022
+  #     api_key: os.environ/ANTHROPIC_API_KEY
+
+  # Заглушка для локальной проверки (без реального провайдера)
+  - model_name: echo
+    litellm_params:
+      model: openai/echo
+      api_key: fake-key
+
+litellm_settings:
+  set_verbose: false
+  # callbacks: ["lago"]  # раскомментировать при настройке биллинга
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  database_url: os.environ/DATABASE_URL
