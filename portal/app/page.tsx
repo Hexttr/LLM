@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Box,
   Container,
@@ -113,17 +113,44 @@ function TierSection({
   onToggle: () => void;
 }) {
   const meta = TIER_META[tier.id] ?? TIER_META.daily;
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState(0);
+
+  const measure = () => {
+    if (contentRef.current) setHeight(contentRef.current.scrollHeight);
+  };
+
+  useEffect(() => {
+    if (!contentRef.current) return;
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(contentRef.current);
+    return () => ro.disconnect();
+  }, [tier.textModels.length, tier.imageModels.length]);
+
+  useEffect(() => {
+    if (isOpen) {
+      const t = requestAnimationFrame(() => {
+        requestAnimationFrame(measure);
+      });
+      return () => cancelAnimationFrame(t);
+    }
+  }, [isOpen]);
 
   return (
     <Box
-      mb={6}
       borderRadius="16px"
       overflow="hidden"
       bg="#ffffff"
-      boxShadow={isOpen ? "0 8px 30px rgba(0,0,0,0.08)" : "0 2px 8px rgba(0,0,0,0.04)"}
-      border="1px solid #e5e7eb"
-      transition="box-shadow 0.25s ease, border-color 0.2s"
+      boxShadow={isOpen ? "0 12px 40px rgba(0,0,0,0.1)" : "0 2px 12px rgba(0,0,0,0.06)"}
+      border="2px solid"
+      borderColor={isOpen ? meta.border : "#e5e7eb"}
+      transition="box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease, transform 0.2s ease"
       _hover={{ borderColor: isOpen ? meta.border : "#d1d5db" }}
+      flex="1"
+      minW={0}
+      display="flex"
+      flexDirection="column"
     >
       <Box
         as="button"
@@ -136,94 +163,96 @@ function TierSection({
         transition="background 0.2s"
         sx={{
           background: meta.bg,
-          borderLeft: "4px solid",
-          borderLeftColor: meta.border,
+          borderBottom: "1px solid",
+          borderBottomColor: isOpen ? "#e5e7eb" : "transparent",
         }}
       >
-        <Box px={6} py={5}>
-          <Flex align="flex-start" justify="space-between" gap={4} flexWrap="wrap">
+        <Box px={5} py={4}>
+          <Flex align="center" justify="space-between" gap={3}>
             <Box flex={1} minW={0}>
-              <Flex align="center" gap={3} mb={2}>
-                <Heading size="md" color="#111827" fontSize="1.35rem" fontWeight="800">
+              <Flex align="center" gap={2} flexWrap="wrap" mb={1}>
+                <Heading size="md" color="#111827" fontSize="1.15rem" fontWeight="800">
                   {tier.title}
                 </Heading>
                 <Box
-                  px={2.5}
+                  px={2}
                   py={0.5}
                   borderRadius="full"
                   fontSize="xs"
                   fontWeight="600"
                   color={meta.accent}
-                  bg={`${meta.accent}18`}
+                  bg={`${meta.accent}20`}
                 >
                   {meta.badge}
                 </Box>
               </Flex>
-              <Text color="#4b5563" fontSize="sm" lineHeight="1.5" maxW="560px">
+              <Text color="#4b5563" fontSize="xs" lineHeight="1.45" noOfLines={2}>
                 {meta.desc}
               </Text>
-              <Text color="#6b7280" fontSize="xs" mt={1}>
-                {tier.subtitle}
-              </Text>
             </Box>
-            <Flex
-              align="center"
-              justify="center"
-              w="40px"
-              h="40px"
+            <Box
+              flexShrink={0}
+              w="36px"
+              h="36px"
               borderRadius="10px"
               bg="white"
-              boxShadow="0 1px 3px rgba(0,0,0,0.08)"
-              sx={{
-                "& > span": {
-                  display: "inline-block",
+              boxShadow="0 1px 4px rgba(0,0,0,0.08)"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              transition="transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)"
+              style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+            >
+              <Box
+                as="span"
+                sx={{
+                  display: "block",
                   width: "10px",
                   height: "10px",
                   borderRight: "2px solid #6b7280",
                   borderBottom: "2px solid #6b7280",
-                  transform: isOpen ? "rotate(-135deg) translateY(2px)" : "rotate(45deg)",
-                  transition: "transform 0.25s ease",
-                },
-              }}
-            >
-              <span />
-            </Flex>
+                  transform: "rotate(45deg) translateY(-1px)",
+                }}
+              />
+            </Box>
           </Flex>
         </Box>
       </Box>
 
-      {isOpen && (
-        <Box borderTop="1px solid #e5e7eb" bg="#fafbfc" px={6} pb={6} pt={4}>
-          <SimpleGrid columns={{ base: 1, lg: 2 }} gap={8} mt={2}>
-            <Box>
-              <Flex align="center" gap={2} mb={4}>
-                <Box w="4px" h="22px" borderRadius="full" bg="#2563eb" />
-                <Text fontWeight="700" color="#374151" fontSize="0.9375rem">
-                  Текстовые модели
-                </Text>
-              </Flex>
-              <SimpleGrid columns={{ base: 1, sm: 2 }} gap={4}>
-                {tier.textModels.map((m) => (
-                  <ModelCard key={m.name} item={m} accentColor={meta.accent} />
-                ))}
-              </SimpleGrid>
-            </Box>
-            <Box>
-              <Flex align="center" gap={2} mb={4}>
-                <Box w="4px" h="22px" borderRadius="full" bg="#f59e0b" />
-                <Text fontWeight="700" color="#374151" fontSize="0.9375rem">
-                  Генерация изображений
-                </Text>
-              </Flex>
-              <SimpleGrid columns={{ base: 1, sm: 2 }} gap={4}>
-                {tier.imageModels.map((m) => (
-                  <ModelCard key={m.name} item={m} accentColor={meta.accent} />
-                ))}
-              </SimpleGrid>
-            </Box>
-          </SimpleGrid>
+      <Box
+        overflow="hidden"
+        transition="max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
+        style={{ maxHeight: isOpen ? height : 0 }}
+      >
+        <Box ref={contentRef} borderTop="1px solid #e5e7eb" bg="#fafbfc" px={5} pb={5} pt={4}>
+          <Box mb={4}>
+            <Flex align="center" gap={2} mb={3}>
+              <Box w="3px" h="18px" borderRadius="full" bg="#2563eb" />
+              <Text fontWeight="700" color="#374151" fontSize="xs">
+                Текстовые модели
+              </Text>
+            </Flex>
+            <SimpleGrid columns={1} gap={2}>
+              {tier.textModels.map((m) => (
+                <ModelCard key={m.name} item={m} accentColor={meta.accent} />
+              ))}
+            </SimpleGrid>
+          </Box>
+          <Box>
+            <Flex align="center" gap={2} mb={3}>
+              <Box w="3px" h="18px" borderRadius="full" bg="#f59e0b" />
+              <Text fontWeight="700" color="#374151" fontSize="xs">
+                Генерация изображений
+              </Text>
+            </Flex>
+            <SimpleGrid columns={1} gap={2}>
+              {tier.imageModels.map((m) => (
+                <ModelCard key={m.name} item={m} accentColor={meta.accent} />
+              ))}
+            </SimpleGrid>
+          </Box>
         </Box>
-      )}
+      </Box>
     </Box>
   );
 }
@@ -349,7 +378,11 @@ export default function Home() {
           </Text>
         )}
         {!loading && !error && tiers.length > 0 && (
-          <>
+          <SimpleGrid
+            columns={{ base: 1, md: 3 }}
+            gap={6}
+            alignItems="stretch"
+          >
             {tiers.map((tier) => (
               <TierSection
                 key={tier.id}
@@ -358,7 +391,7 @@ export default function Home() {
                 onToggle={() => toggleTier(tier.id)}
               />
             ))}
-          </>
+          </SimpleGrid>
         )}
 
         <Box mt={14} textAlign="center">
