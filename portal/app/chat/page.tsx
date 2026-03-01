@@ -14,11 +14,14 @@ import {
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
+import { useTheme } from "@/lib/theme-context";
 
-const EXAMPLE_PROMPTS = [
-  "Объясни простыми словами, как работает API",
-  "Напиши короткий пример кода на TypeScript",
-  "Какие есть способы оптимизировать запросы к БД?",
+const SUGGESTION_CARDS = [
+  { icon: "💡", title: "Объяснение", prompt: "Объясни простыми словами, как работает API" },
+  { icon: "</>", title: "Код", prompt: "Напиши короткий пример кода на TypeScript" },
+  { icon: "🗄", title: "Оптимизация", prompt: "Как оптимизировать запросы к БД?" },
+  { icon: "📄", title: "Краткое содержание", prompt: "Выдели главное в этом тексте" },
+  { icon: "🌐", title: "Перевод", prompt: "Переведи этот текст на английский" },
 ];
 
 const STORAGE_KEY = "portal_chat_dialogs";
@@ -86,6 +89,8 @@ export default function ChatPage() {
   const [isDragOver, setIsDragOver] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const { theme, setTheme } = useTheme();
+  const [modelSelectOpen, setModelSelectOpen] = useState(false);
 
   useEffect(() => {
     setSavedDialogs(loadSavedDialogs());
@@ -291,6 +296,9 @@ export default function ChatPage() {
     );
   }
 
+  const displayModelName = selectedModel ? (selectedModel.replace(/^groq-/, "").replace(/-/g, " ") || selectedModel) : "";
+  const providerLabel = selectedModel?.startsWith("groq") ? "Groq" : "Модель";
+
   return (
     <Box
       minH="100vh"
@@ -301,7 +309,67 @@ export default function ChatPage() {
     >
       <Navbar />
 
-      <Box flex="1" display="flex" flexDirection="column" alignItems="center" w="100%" py={{ base: 4, md: 8 }} px={4}>
+      {/* Шапка чата: лого + Чат | История, Новый диалог, тема, В кабинет */}
+      <Box
+        borderBottom="1px solid var(--chat-card-border)"
+        bg="var(--chat-card-bg)"
+        py={3}
+        px={4}
+        flexShrink={0}
+      >
+        <Flex maxW="900px" mx="auto" justify="space-between" align="center" flexWrap="wrap" gap={3}>
+          <Flex align="center" gap={3}>
+            <Link href="/" style={{ textDecoration: "none" }}>
+              <Flex align="center" gap={2}>
+                <Box as="span" fontSize="20px" color="#2563eb">⚡</Box>
+                <Text fontWeight="700" fontSize="18px" color="var(--foreground)">21day.club</Text>
+              </Flex>
+            </Link>
+            <Text color="var(--foreground-muted)" fontSize="15px" fontWeight="500">Чат</Text>
+          </Flex>
+          <Flex align="center" gap={2} flexWrap="wrap">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setShowHistory((v) => !v)}
+              leftIcon={<Box as="span" fontSize="14px">↻</Box>}
+              sx={{ color: "var(--foreground-muted)", _hover: { bg: "var(--chat-history-item-hover)" } }}
+            >
+              История{savedDialogs.length > 0 ? ` ${savedDialogs.length}` : ""}
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={clearChat}
+              leftIcon={<Box as="span" fontSize="14px">+</Box>}
+              sx={{ color: "var(--foreground-muted)", _hover: { bg: "var(--chat-history-item-hover)" } }}
+            >
+              Новый диалог
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+              aria-label={theme === "light" ? "Тёмная тема" : "Светлая тема"}
+              sx={{ color: "var(--foreground-muted)", _hover: { bg: "var(--chat-history-item-hover)" } }}
+            >
+              {theme === "light" ? "☀" : "🌙"}
+            </Button>
+            <Link href="/dashboard">
+              <Button
+                size="sm"
+                variant="ghost"
+                leftIcon={<Box as="span" fontSize="14px">←</Box>}
+                sx={{ color: "var(--foreground-muted)", _hover: { bg: "var(--chat-history-item-hover)" } }}
+              >
+                В кабинет
+              </Button>
+            </Link>
+          </Flex>
+        </Flex>
+      </Box>
+
+      <Box flex="1" display="flex" flexDirection="column" alignItems="center" w="100%" py={4} px={4}>
         <Container
           maxW="720px"
           w="100%"
@@ -309,62 +377,9 @@ export default function ChatPage() {
           flex="1"
           display="flex"
           flexDirection="column"
-          maxH="calc(100vh - 72px)"
+          maxH="calc(100vh - 140px)"
           px={{ base: 3, md: 6 }}
         >
-          {/* Заголовок и действия */}
-          <Flex justify="space-between" align="center" mb={4} flexShrink={0} flexWrap="wrap" gap={3}>
-            <Heading
-              size="lg"
-              fontSize={{ base: "1.25rem", md: "1.5rem" }}
-              fontWeight="700"
-              color="var(--chat-heading-color)"
-              letterSpacing="-0.02em"
-            >
-              Чат с моделью
-            </Heading>
-            <Flex gap={2} flexWrap="wrap">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setShowHistory((v) => !v)}
-                sx={{
-                  borderColor: "var(--chat-card-border)",
-                  color: "var(--foreground-muted)",
-                  _hover: { bg: "var(--chat-history-item-hover)", borderColor: "var(--chat-model-label)" },
-                }}
-              >
-                {showHistory ? "Скрыть историю" : "История"}
-                {savedDialogs.length > 0 && ` (${savedDialogs.length})`}
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={clearChat}
-                disabled={messages.length === 0}
-                sx={{
-                  borderColor: "var(--chat-card-border)",
-                  color: "var(--foreground-muted)",
-                  _hover: { bg: "var(--chat-history-item-hover)", borderColor: "var(--chat-model-label)" },
-                }}
-              >
-                Новый диалог
-              </Button>
-              <Link href="/dashboard">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  sx={{
-                    borderColor: "var(--chat-card-border)",
-                    color: "var(--foreground-muted)",
-                    _hover: { bg: "var(--chat-history-item-hover)", borderColor: "var(--chat-model-label)" },
-                  }}
-                >
-                  В кабинет
-                </Button>
-              </Link>
-            </Flex>
-          </Flex>
 
           {/* Блок сохранённых диалогов */}
           {showHistory && (
@@ -425,6 +440,85 @@ export default function ChatPage() {
             </Box>
           )}
 
+          {/* Селектор модели — карточка с иконкой и выпадающим списком */}
+          <Box mb={4} flexShrink={0} position="relative">
+            {loadingModels ? (
+              <Flex align="center" gap={2} p={3}>
+                <Spinner size="sm" color="blue.500" />
+                <Text fontSize="14px" color="var(--foreground-muted)">Загрузка моделей...</Text>
+              </Flex>
+            ) : (
+              <>
+                <Flex
+                  align="center"
+                  gap={3}
+                  p={3}
+                  borderRadius="12px"
+                  border="1px solid var(--chat-card-border)"
+                  bg="var(--chat-card-bg)"
+                  cursor="pointer"
+                  onClick={() => setModelSelectOpen((o) => !o)}
+                  sx={{ _hover: { borderColor: "#2563eb" } }}
+                >
+                  <Box as="span" fontSize="20px" color="#2563eb">⚡</Box>
+                  <Box flex={1} minW={0}>
+                    <Text fontWeight="600" fontSize="16px" color="var(--foreground)" noOfLines={1}>
+                      {displayModelName || "Выберите модель"}
+                    </Text>
+                    <Text fontSize="13px" color="var(--foreground-muted)">{providerLabel}</Text>
+                  </Box>
+                  <Box as="span" fontSize="14px" color="var(--foreground-muted)" transform={modelSelectOpen ? "rotate(180deg)" : undefined} transition="transform 0.2s">▼</Box>
+                </Flex>
+                {modelSelectOpen && (
+                  <>
+                    <Box position="fixed" inset={0} zIndex={9} onClick={() => setModelSelectOpen(false)} />
+                    <Box
+                      position="absolute"
+                      top="100%"
+                      left={0}
+                      right={0}
+                      mt={1}
+                      py={1}
+                      borderRadius="8px"
+                      bg="var(--chat-card-bg)"
+                      border="1px solid var(--chat-card-border)"
+                      boxShadow="lg"
+                      zIndex={10}
+                      maxH="240px"
+                      overflowY="auto"
+                    >
+                      {models.map((m) => (
+                        <Box
+                          key={m.model_name}
+                          px={3}
+                          py={2}
+                          cursor="pointer"
+                          onClick={() => {
+                            setSelectedModel(m.model_name);
+                            setModelSelectOpen(false);
+                          }}
+                          sx={{ _hover: { bg: "var(--chat-history-item-hover)" } }}
+                        >
+                          <Text fontSize="14px" fontWeight="500" color="var(--foreground)">{m.model_name}</Text>
+                        </Box>
+                      ))}
+                    </Box>
+                  </>
+                )}
+              </>
+            )}
+            {attachedFiles.length > 0 && (
+              <Flex align="center" gap={2} mt={2} flexWrap="wrap">
+                <Text fontSize="13px" color="var(--foreground-muted)">
+                  Прикреплено: {attachedFiles.map((f) => f.name).join(", ")}
+                </Text>
+                <Button size="xs" variant="ghost" color="var(--foreground-subtle)" onClick={clearAttached}>
+                  Убрать
+                </Button>
+              </Flex>
+            )}
+          </Box>
+
           {/* Карточка чата (зона drag & drop) */}
           <Box
             flex="1"
@@ -460,54 +554,6 @@ export default function ChatPage() {
                 </Text>
               </Box>
             )}
-            {/* Выбор модели и папки */}
-            <Flex
-              p={4}
-              borderBottom="1px solid var(--chat-card-border)"
-              gap={4}
-              align="center"
-              flexShrink={0}
-              flexWrap="wrap"
-            >
-              <Text fontSize="14px" fontWeight="600" color="var(--chat-model-label)">
-                Модель
-              </Text>
-              {loadingModels ? (
-                <Spinner size="sm" color="blue.500" />
-              ) : (
-                <select
-                  value={selectedModel}
-                  onChange={(e) => setSelectedModel(e.target.value)}
-                  aria-label="Выберите модель"
-                  style={{
-                    minWidth: "200px",
-                    padding: "8px 12px",
-                    borderRadius: "8px",
-                    border: "1px solid var(--chat-input-border)",
-                    background: "var(--chat-input-bg)",
-                    color: "var(--foreground)",
-                    fontSize: "14px",
-                    cursor: "pointer",
-                  }}
-                >
-                  {models.map((m) => (
-                    <option key={m.model_name} value={m.model_name}>
-                      {m.model_name}
-                    </option>
-                  ))}
-                </select>
-              )}
-              {attachedFiles.length > 0 && (
-                <Flex align="center" gap={2} flexWrap="wrap">
-                  <Text fontSize="13px" color="var(--foreground-muted)">
-                    Прикреплено: {attachedFiles.map((f) => f.name).join(", ")}
-                  </Text>
-                  <Button size="xs" variant="ghost" color="var(--foreground-subtle)" onClick={clearAttached}>
-                    Убрать
-                  </Button>
-                </Flex>
-              )}
-            </Flex>
 
             {/* Лента сообщений */}
             <Box
@@ -518,35 +564,52 @@ export default function ChatPage() {
               flexDirection="column"
               gap={4}
             >
+              {messages.length > 0 && (
+                <Text fontSize="13px" color="var(--foreground-muted)" mb={1}>
+                  {messages.length} {messages.length === 1 ? "сообщение" : messages.length < 5 ? "сообщения" : "сообщений"}
+                </Text>
+              )}
+
               {messages.length === 0 && !loading && (
-                <Flex flexDirection="column" align="center" justify="center" py={12} textAlign="center">
-                  <Text color="var(--chat-empty-text)" fontSize="15px" mb={3} maxW="340px" lineHeight="1.6">
-                    Напишите сообщение — диалог сохраняет контекст. При «Новый диалог» текущий чат попадёт в сохранённые.
+                <Flex flexDirection="column" align="center" justify="center" py={8} textAlign="center">
+                  <Box as="span" fontSize="48px" color="#2563eb" mb={4} opacity={0.9} lineHeight={1}>
+                    💬
+                  </Box>
+                  <Heading size="md" color="var(--foreground)" mb={2} fontWeight="600">
+                    Начните разговор
+                  </Heading>
+                  <Text color="var(--chat-empty-text)" fontSize="15px" mb={2} maxW="380px" lineHeight="1.6">
+                    Напишите сообщение — диалог сохраняет контекст.
                   </Text>
-                  <Text color="var(--foreground-subtle)" fontSize="13px" mb={5}>
+                  <Text color="var(--foreground-subtle)" fontSize="13px" mb={6}>
                     Можно перетащить файлы в чат — их содержимое будет отправлено с сообщением.
                   </Text>
-                  <Flex flexWrap="wrap" gap={2} justify="center">
-                    {EXAMPLE_PROMPTS.map((prompt) => (
-                      <Button
-                        key={prompt}
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setInput(prompt)}
+                  <Flex flexWrap="wrap" gap={3} justify="center" maxW="520px">
+                    {SUGGESTION_CARDS.map((card) => (
+                      <Box
+                        key={card.title}
+                        as="button"
+                        type="button"
+                        onClick={() => setInput(card.prompt)}
+                        textAlign="left"
+                        p={4}
+                        borderRadius="12px"
+                        border="1px solid var(--chat-card-border)"
+                        bg="var(--chat-prompt-btn-bg)"
+                        cursor="pointer"
+                        transition="all 0.2s"
                         sx={{
-                          bg: "var(--chat-prompt-btn-bg)",
-                          borderColor: "var(--chat-prompt-btn-border)",
-                          color: "var(--chat-prompt-btn-color)",
-                          fontWeight: "500",
-                          fontSize: "13px",
                           _hover: {
+                            borderColor: "#2563eb",
                             bg: "var(--chat-prompt-btn-hover-bg)",
-                            borderColor: "var(--chat-model-label)",
+                            transform: "translateY(-1px)",
                           },
                         }}
                       >
-                        {prompt}
-                      </Button>
+                        <Text fontSize="18px" mb={2}>{card.icon}</Text>
+                        <Text fontWeight="600" fontSize="14px" color="var(--foreground)" mb={1}>{card.title}</Text>
+                        <Text fontSize="13px" color="var(--foreground-muted)" lineHeight="1.4">{card.prompt}</Text>
+                      </Box>
                     ))}
                   </Flex>
                 </Flex>
@@ -556,41 +619,59 @@ export default function ChatPage() {
                 const isError = msg.role === "assistant" && msg.content.startsWith("Ошибка:");
                 const isUser = msg.role === "user";
                 return (
-                  <Box
+                  <Flex
                     key={i}
+                    align="flex-end"
+                    gap={2}
+                    flexDirection={isUser ? "row-reverse" : "row"}
                     alignSelf={isUser ? "flex-end" : "flex-start"}
                     maxW="88%"
-                    px={4}
-                    py={3}
-                    borderRadius="14px"
-                    fontSize="15px"
-                    lineHeight="1.6"
-                    whiteSpace="pre-wrap"
-                    border="1px solid"
-                    boxShadow="0 1px 3px rgba(0,0,0,0.08)"
-                    style={{
-                      backgroundColor: isUser
-                        ? "var(--chat-bubble-user-bg)"
-                        : isError
-                          ? "var(--chat-bubble-error-bg)"
-                          : "var(--chat-bubble-assistant-bg)",
-                      color: isUser
-                        ? "var(--chat-bubble-user-color)"
-                        : isError
-                          ? "var(--chat-bubble-error-color)"
-                          : "var(--chat-bubble-assistant-color)",
-                      borderColor: isError
-                        ? "var(--chat-bubble-error-border)"
-                        : isUser
-                          ? "var(--chat-bubble-user-border)"
-                          : "var(--chat-bubble-assistant-border)",
-                    }}
                   >
-                    <Text fontSize="11px" fontWeight="600" opacity={0.9} mb={1.5}>
-                      {isUser ? "Вы" : "Модель"}
-                    </Text>
-                    {msg.content}
-                  </Box>
+                    <Box
+                      flex={1}
+                      px={4}
+                      py={3}
+                      borderRadius="14px"
+                      fontSize="15px"
+                      lineHeight="1.6"
+                      whiteSpace="pre-wrap"
+                      border="1px solid"
+                      boxShadow="0 1px 3px rgba(0,0,0,0.08)"
+                      style={{
+                        backgroundColor: isUser
+                          ? "var(--chat-bubble-user-bg)"
+                          : isError
+                            ? "var(--chat-bubble-error-bg)"
+                            : "var(--chat-bubble-assistant-bg)",
+                        color: isUser
+                          ? "var(--chat-bubble-user-color)"
+                          : isError
+                            ? "var(--chat-bubble-error-color)"
+                            : "var(--chat-bubble-assistant-color)",
+                        borderColor: isError
+                          ? "var(--chat-bubble-error-border)"
+                          : isUser
+                            ? "var(--chat-bubble-user-border)"
+                            : "var(--chat-bubble-assistant-border)",
+                      }}
+                    >
+                      {msg.content}
+                    </Box>
+                    <Box
+                      flexShrink={0}
+                      w={8}
+                      h={8}
+                      borderRadius="full"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      fontSize="14px"
+                      bg={isUser ? "var(--chat-bubble-user-bg)" : "transparent"}
+                      color={isUser ? "#fff" : "#2563eb"}
+                    >
+                      {isUser ? "👤" : "⚡"}
+                    </Box>
+                  </Flex>
                 );
               })}
 
@@ -613,7 +694,7 @@ export default function ChatPage() {
               <div ref={bottomRef} />
             </Box>
 
-            {/* Поле ввода */}
+            {/* Поле ввода: скрепка | поле | круглая кнопка отправки */}
             <Box
               p={4}
               borderTop="1px solid var(--chat-card-border)"
@@ -621,48 +702,67 @@ export default function ChatPage() {
               bg="var(--chat-card-bg)"
               transition="background-color 0.2s ease, border-color 0.2s ease"
             >
-              <Textarea
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    send();
-                  }
-                }}
-                placeholder="Сообщение... (Enter — отправить, Shift+Enter — новая строка)"
-                minH="96px"
-                mb={3}
-                borderRadius="12px"
-                padding="14px 18px"
-                fontSize="16px"
-                resize="none"
-                aria-label="Введите сообщение"
-                sx={{
-                  bg: "var(--chat-input-bg)",
-                  border: "1px solid var(--chat-input-border)",
-                  color: "var(--foreground)",
-                  _placeholder: { color: "var(--chat-input-placeholder)" },
-                  _focus: {
-                    borderColor: "var(--input-focus-border)",
-                    boxShadow: "0 0 0 3px var(--input-focus-ring)",
-                  },
-                }}
-              />
-              <Button
-                onClick={send}
-                colorScheme="blue"
-                size="lg"
-                loading={loading}
-                disabled={!input.trim() || !selectedModel}
-                borderRadius="10px"
-                fontWeight="600"
-                fontSize="15px"
-                px={8}
-              >
-                Отправить
-              </Button>
+              <Flex align="flex-end" gap={2} mb={2}>
+                <Box
+                  as="span"
+                  fontSize="18px"
+                  color="var(--foreground-muted)"
+                  flexShrink={0}
+                  title="Прикрепить файл"
+                >
+                  📎
+                </Box>
+                <Textarea
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      send();
+                    }
+                  }}
+                  placeholder="Напишите сообщение... (Enter — отправить, Shift+Enter — новая строка)"
+                  minH="48px"
+                  maxH="160px"
+                  borderRadius="12px"
+                  padding="12px 16px"
+                  fontSize="15px"
+                  resize="none"
+                  flex={1}
+                  aria-label="Введите сообщение"
+                  sx={{
+                    bg: "var(--chat-input-bg)",
+                    border: "1px solid var(--chat-input-border)",
+                    color: "var(--foreground)",
+                    _placeholder: { color: "var(--chat-input-placeholder)" },
+                    _focus: {
+                      borderColor: "var(--input-focus-border)",
+                      boxShadow: "0 0 0 3px var(--input-focus-ring)",
+                    },
+                  }}
+                />
+                <Button
+                  onClick={send}
+                  size="lg"
+                  loading={loading}
+                  disabled={!input.trim() || !selectedModel}
+                  w="48px"
+                  h="48px"
+                  minW="48px"
+                  borderRadius="full"
+                  bg="#2563eb"
+                  color="white"
+                  flexShrink={0}
+                  sx={{ _hover: { bg: "#1d4ed8" } }}
+                  aria-label="Отправить"
+                >
+                  ➤
+                </Button>
+              </Flex>
+              <Text fontSize="12px" color="var(--foreground-subtle)" textAlign="center">
+                Enter — отправить, Shift+Enter — новая строка
+              </Text>
             </Box>
           </Box>
         </Container>
