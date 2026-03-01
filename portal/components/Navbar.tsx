@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Box, Flex, Button, Text } from "@chakra-ui/react";
+import { Box, Flex, Button, Text, Spinner } from "@chakra-ui/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -22,8 +22,6 @@ export function Navbar() {
     router.push("/");
     router.refresh();
   };
-
-  const showLoggedOut = isLoggedIn !== true;
 
   return (
     <Box
@@ -55,8 +53,12 @@ export function Navbar() {
           </Box>
         </Link>
 
-        <Flex align="center" gap={2} flexWrap="wrap" justify="flex-end">
-          {showLoggedOut && (
+        <Flex align="center" gap={2} flexWrap="wrap" justify="flex-end" minW="140px">
+          {isLoggedIn === null && (
+            <Spinner size="sm" color="var(--foreground-subtle)" />
+          )}
+
+          {isLoggedIn === false && (
             <>
               <Link href="/login">
                 <Button
@@ -91,7 +93,7 @@ export function Navbar() {
             </>
           )}
 
-          {!showLoggedOut && (
+          {isLoggedIn === true && (
             <>
               <Link href="/dashboard">
                 <Button
