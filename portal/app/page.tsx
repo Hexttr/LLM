@@ -200,7 +200,8 @@ export default function Home() {
       {/* Hero */}
       <Box
         w="100%"
-        bg="linear-gradient(180deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%)"
+        className="hero-animated-bg"
+        position="relative"
         borderBottom="1px solid #e2e8f0"
         pt={{ base: 10, md: 14 }}
         pb={{ base: 12, md: 16 }}
@@ -216,11 +217,10 @@ export default function Home() {
               lineHeight="1.2"
               mb={4}
             >
-              Единый API для языковых моделей и генерации изображений
+              Пользуйся всеми моделями ИИ без VPN
             </Heading>
             <Text fontSize="lg" color="#475569" lineHeight="1.65" mb={8}>
-              Один ключ — доступ к бесплатным и премиум моделям. Регистрируйтесь, получайте API-ключ и подключайте
-              чат и генерацию картинок в свои приложения.
+              Общий рублёвый счёт и старт за 5 минут.
             </Text>
             <Flex gap={3} justify="center" flexWrap="wrap">
               <Link href="/register">
