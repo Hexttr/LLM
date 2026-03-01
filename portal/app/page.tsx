@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Container,
@@ -103,155 +103,60 @@ function ModelCard({
   );
 }
 
-function TierSection({
+function TierCard({
   tier,
-  isOpen,
-  onToggle,
+  isSelected,
+  onSelect,
 }: {
   tier: TierData;
-  isOpen: boolean;
-  onToggle: () => void;
+  isSelected: boolean;
+  onSelect: () => void;
 }) {
   const meta = TIER_META[tier.id] ?? TIER_META.daily;
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [height, setHeight] = useState(0);
-
-  const measure = () => {
-    if (contentRef.current) setHeight(contentRef.current.scrollHeight);
-  };
-
-  useEffect(() => {
-    if (!contentRef.current) return;
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(contentRef.current);
-    return () => ro.disconnect();
-  }, [tier.textModels.length, tier.imageModels.length]);
-
-  useEffect(() => {
-    if (isOpen) {
-      const t = requestAnimationFrame(() => {
-        requestAnimationFrame(measure);
-      });
-      return () => cancelAnimationFrame(t);
-    }
-  }, [isOpen]);
 
   return (
     <Box
+      as="button"
+      type="button"
+      width="100%"
+      textAlign="left"
+      onClick={onSelect}
+      cursor="pointer"
       borderRadius="16px"
       overflow="hidden"
       bg="#ffffff"
-      boxShadow={isOpen ? "0 12px 40px rgba(0,0,0,0.1)" : "0 2px 12px rgba(0,0,0,0.06)"}
+      boxShadow={isSelected ? "0 12px 40px rgba(0,0,0,0.12)" : "0 2px 12px rgba(0,0,0,0.06)"}
       border="2px solid"
-      borderColor={isOpen ? meta.border : "#e5e7eb"}
-      transition="box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease, transform 0.2s ease"
-      _hover={{ borderColor: isOpen ? meta.border : "#d1d5db" }}
+      borderColor={isSelected ? meta.border : "#e5e7eb"}
+      transition="box-shadow 0.25s ease, border-color 0.25s ease, transform 0.2s ease"
+      _hover={{ borderColor: meta.border }}
+      _focusVisible={{ outline: "2px solid", outlineColor: meta.accent, outlineOffset: "2px" }}
       flex="1"
       minW={0}
-      display="flex"
-      flexDirection="column"
+      sx={{
+        background: isSelected ? meta.bg : "#ffffff",
+      }}
     >
-      <Box
-        as="button"
-        type="button"
-        width="100%"
-        textAlign="left"
-        onClick={onToggle}
-        cursor="pointer"
-        _focusVisible={{ outline: "2px solid", outlineColor: meta.accent, outlineOffset: "2px" }}
-        transition="background 0.2s"
-        sx={{
-          background: meta.bg,
-          borderBottom: "1px solid",
-          borderBottomColor: isOpen ? "#e5e7eb" : "transparent",
-        }}
-      >
-        <Box px={5} py={4}>
-          <Flex align="center" justify="space-between" gap={3}>
-            <Box flex={1} minW={0}>
-              <Flex align="center" gap={2} flexWrap="wrap" mb={1}>
-                <Heading size="md" color="#111827" fontSize="1.15rem" fontWeight="800">
-                  {tier.title}
-                </Heading>
-                <Box
-                  px={2}
-                  py={0.5}
-                  borderRadius="full"
-                  fontSize="xs"
-                  fontWeight="600"
-                  color={meta.accent}
-                  bg={`${meta.accent}20`}
-                >
-                  {meta.badge}
-                </Box>
-              </Flex>
-              <Text color="#4b5563" fontSize="xs" lineHeight="1.45" noOfLines={2}>
-                {meta.desc}
-              </Text>
-            </Box>
-            <Box
-              flexShrink={0}
-              w="36px"
-              h="36px"
-              borderRadius="10px"
-              bg="white"
-              boxShadow="0 1px 4px rgba(0,0,0,0.08)"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              transition="transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)"
-              style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
-            >
-              <Box
-                as="span"
-                sx={{
-                  display: "block",
-                  width: "10px",
-                  height: "10px",
-                  borderRight: "2px solid #6b7280",
-                  borderBottom: "2px solid #6b7280",
-                  transform: "rotate(45deg) translateY(-1px)",
-                }}
-              />
-            </Box>
-          </Flex>
-        </Box>
-      </Box>
-
-      <Box
-        overflow="hidden"
-        transition="max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
-        style={{ maxHeight: isOpen ? height : 0 }}
-      >
-        <Box ref={contentRef} borderTop="1px solid #e5e7eb" bg="#fafbfc" px={5} pb={5} pt={4}>
-          <Box mb={4}>
-            <Flex align="center" gap={2} mb={3}>
-              <Box w="3px" h="18px" borderRadius="full" bg="#2563eb" />
-              <Text fontWeight="700" color="#374151" fontSize="xs">
-                Текстовые модели
-              </Text>
-            </Flex>
-            <SimpleGrid columns={1} gap={2}>
-              {tier.textModels.map((m) => (
-                <ModelCard key={m.name} item={m} accentColor={meta.accent} />
-              ))}
-            </SimpleGrid>
+      <Box px={5} py={4}>
+        <Flex align="center" gap={2} flexWrap="wrap" mb={2}>
+          <Heading size="md" color="#111827" fontSize="1.15rem" fontWeight="800">
+            {tier.title}
+          </Heading>
+          <Box
+            px={2}
+            py={0.5}
+            borderRadius="full"
+            fontSize="xs"
+            fontWeight="600"
+            color={meta.accent}
+            bg={`${meta.accent}20`}
+          >
+            {meta.badge}
           </Box>
-          <Box>
-            <Flex align="center" gap={2} mb={3}>
-              <Box w="3px" h="18px" borderRadius="full" bg="#f59e0b" />
-              <Text fontWeight="700" color="#374151" fontSize="xs">
-                Генерация изображений
-              </Text>
-            </Flex>
-            <SimpleGrid columns={1} gap={2}>
-              {tier.imageModels.map((m) => (
-                <ModelCard key={m.name} item={m} accentColor={meta.accent} />
-              ))}
-            </SimpleGrid>
-          </Box>
-        </Box>
+        </Flex>
+        <Text color="#4b5563" fontSize="xs" lineHeight="1.5" noOfLines={2}>
+          {meta.desc}
+        </Text>
       </Box>
     </Box>
   );
@@ -261,7 +166,7 @@ export default function Home() {
   const [tiers, setTiers] = useState<TierData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [openTierIds, setOpenTierIds] = useState<Set<string>>(new Set());
+  const [selectedTierId, setSelectedTierId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/model-tiers")
@@ -274,14 +179,7 @@ export default function Home() {
       .finally(() => setLoading(false));
   }, []);
 
-  const toggleTier = (id: string) => {
-    setOpenTierIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
+  const selectedTier = selectedTierId ? tiers.find((t) => t.id === selectedTierId) : null;
 
   return (
     <Box minH="100vh" w="100%" bg="#fafbfc">
@@ -363,8 +261,8 @@ export default function Home() {
         >
           Каталог моделей
         </Heading>
-        <Text textAlign="center" color="#64748b" fontSize="sm" mb={10}>
-          Нажмите на раздел, чтобы раскрыть и просмотреть все модели
+        <Text textAlign="center" color="#64748b" fontSize="sm" mb={8}>
+          Выберите категорию — ниже отобразятся модели этого блока
         </Text>
 
         {loading && (
@@ -378,20 +276,84 @@ export default function Home() {
           </Text>
         )}
         {!loading && !error && tiers.length > 0 && (
-          <SimpleGrid
-            columns={{ base: 1, md: 3 }}
-            gap={6}
-            alignItems="stretch"
-          >
-            {tiers.map((tier) => (
-              <TierSection
-                key={tier.id}
-                tier={tier}
-                isOpen={openTierIds.has(tier.id)}
-                onToggle={() => toggleTier(tier.id)}
-              />
-            ))}
-          </SimpleGrid>
+          <>
+            <SimpleGrid columns={{ base: 1, md: 3 }} gap={6} mb={10}>
+              {tiers.map((tier) => (
+                <TierCard
+                  key={tier.id}
+                  tier={tier}
+                  isSelected={selectedTierId === tier.id}
+                  onSelect={() => setSelectedTierId((prev) => (prev === tier.id ? null : tier.id))}
+                />
+              ))}
+            </SimpleGrid>
+
+            {selectedTier && (
+              <Box
+                borderRadius="16px"
+                border="1px solid #e5e7eb"
+                bg="#fafbfc"
+                overflow="hidden"
+                boxShadow="0 4px 20px rgba(0,0,0,0.06)"
+              >
+                <Box px={6} py={5}>
+                  <Flex align="center" gap={2} mb={4}>
+                    <Box
+                      w="4px"
+                      h="24px"
+                      borderRadius="full"
+                      bg={TIER_META[selectedTier.id]?.border ?? "#2563eb"}
+                    />
+                    <Heading size="md" color="#111827" fontSize="1.15rem" fontWeight="700">
+                      Модели: {selectedTier.title}
+                    </Heading>
+                  </Flex>
+                  <SimpleGrid columns={{ base: 1, lg: 2 }} gap={8}>
+                    <Box>
+                      <Flex align="center" gap={2} mb={4}>
+                        <Box w="4px" h="20px" borderRadius="full" bg="#2563eb" />
+                        <Text fontWeight="700" color="#374151" fontSize="sm">
+                          Текстовые модели
+                        </Text>
+                      </Flex>
+                      <SimpleGrid columns={{ base: 1, sm: 2 }} gap={4}>
+                        {selectedTier.textModels.map((m) => (
+                          <ModelCard
+                            key={m.name}
+                            item={m}
+                            accentColor={TIER_META[selectedTier.id]?.accent ?? "#2563eb"}
+                          />
+                        ))}
+                      </SimpleGrid>
+                    </Box>
+                    <Box>
+                      <Flex align="center" gap={2} mb={4}>
+                        <Box w="4px" h="20px" borderRadius="full" bg="#f59e0b" />
+                        <Text fontWeight="700" color="#374151" fontSize="sm">
+                          Генерация изображений
+                        </Text>
+                      </Flex>
+                      <SimpleGrid columns={{ base: 1, sm: 2 }} gap={4}>
+                        {selectedTier.imageModels.map((m) => (
+                          <ModelCard
+                            key={m.name}
+                            item={m}
+                            accentColor={TIER_META[selectedTier.id]?.accent ?? "#2563eb"}
+                          />
+                        ))}
+                      </SimpleGrid>
+                    </Box>
+                  </SimpleGrid>
+                </Box>
+              </Box>
+            )}
+
+            {!selectedTier && (
+              <Text textAlign="center" color="#94a3b8" fontSize="sm" py={8}>
+                Нажмите на карточку выше, чтобы увидеть модели категории
+              </Text>
+            )}
+          </>
         )}
 
         <Box mt={14} textAlign="center">
