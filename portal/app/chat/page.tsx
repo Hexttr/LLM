@@ -86,17 +86,11 @@ export default function ChatPage() {
   const [folderName, setFolderName] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const folderInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setSavedDialogs(loadSavedDialogs());
   }, []);
 
-  // Устанавливаем webkitdirectory через DOM, чтобы React не ругался и браузер открывал выбор папки
-  useEffect(() => {
-    const el = folderInputRef.current;
-    if (el) el.setAttribute("webkitdirectory", "");
-  }, []);
 
   useEffect(() => {
     fetch("/api/models")
@@ -258,7 +252,23 @@ export default function ChatPage() {
   const clearFolder = () => {
     setFolderFiles([]);
     setFolderName(null);
-    if (folderInputRef.current) folderInputRef.current.value = "";
+  };
+
+  const openFolderPicker = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.multiple = true;
+    input.setAttribute("webkitdirectory", "");
+    input.style.display = "none";
+    input.onchange = (e) => {
+      const files = (e.target as HTMLInputElement).files;
+      if (files?.length) onFolderSelected({ target: { files } } as React.ChangeEvent<HTMLInputElement>);
+      input.remove();
+    };
+    document.body.appendChild(input);
+    input.click();
+    // Если пользователь закрыл диалог без выбора, убираем input
+    setTimeout(() => input.remove(), 1000);
   };
 
   const checkAuth = useCallback(async () => {
@@ -471,26 +481,24 @@ export default function ChatPage() {
                 </select>
               )}
               <Box flex="1" minW={0} />
-              <input
-                ref={folderInputRef}
-                type="file"
-                multiple
-                style={{ display: "none" }}
-                onChange={onFolderSelected}
-              />
               {folderFiles.length === 0 ? (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => folderInputRef.current?.click()}
-                  sx={{
-                    borderColor: "var(--chat-card-border)",
-                    color: "var(--foreground-muted)",
-                    _hover: { bg: "var(--chat-history-item-hover)", borderColor: "var(--chat-model-label)" },
-                  }}
-                >
-                  Выбрать папку для контекста
-                </Button>
+                <Flex align="center" gap={2} flexWrap="wrap">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={openFolderPicker}
+                    sx={{
+                      borderColor: "var(--chat-card-border)",
+                      color: "var(--foreground-muted)",
+                      _hover: { bg: "var(--chat-history-item-hover)", borderColor: "var(--chat-model-label)" },
+                    }}
+                  >
+                    Выбрать папку для контекста
+                  </Button>
+                  <Text fontSize="11px" color="var(--foreground-subtle)" whiteSpace="nowrap" title="В диалоге выберите папку (не файл) и нажмите «Открыть»">
+                    (папку → «Открыть»)
+                  </Text>
+                </Flex>
               ) : (
                 <Flex align="center" gap={2} flexWrap="wrap">
                   <Text fontSize="13px" color="var(--foreground-muted)">
