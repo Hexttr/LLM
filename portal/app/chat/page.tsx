@@ -14,7 +14,6 @@ import {
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
-import { useTheme } from "@/lib/theme-context";
 
 const iconSize = 18;
 const iconStyle = { width: iconSize, height: iconSize, flexShrink: 0 };
@@ -116,7 +115,6 @@ export default function ChatPage() {
   const [isDragOver, setIsDragOver] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const { theme, setTheme } = useTheme();
   const [modelSelectOpen, setModelSelectOpen] = useState(false);
 
   useEffect(() => {
@@ -336,54 +334,6 @@ export default function ChatPage() {
     >
       <Navbar />
 
-      {/* Вторичная шапка: ⚡ 21day.club Чат | ссылки */}
-      <Box borderBottom="1px solid var(--chat-card-border)" bg="var(--chat-card-bg)" py={2.5} px={4} flexShrink={0}>
-        <Flex maxW="900px" mx="auto" justify="space-between" align="center" flexWrap="wrap" gap={3}>
-          <Flex align="center" gap={2}>
-            <Box as="span" fontSize="18px" color="#2563eb">⚡</Box>
-            <Text fontWeight="600" fontSize="15px" color="var(--foreground)">21day.club Чат</Text>
-          </Flex>
-          <Flex align="center" gap={4} color="var(--foreground-muted)" fontSize="14px">
-            <Box
-              as="button"
-              type="button"
-              onClick={() => setShowHistory((v) => !v)}
-              display="inline-flex"
-              alignItems="center"
-              gap={1.5}
-              sx={{ _hover: { color: "var(--foreground)" } }}
-            >
-              <IconHistory />
-              <span>История{savedDialogs.length > 0 ? ` ${savedDialogs.length}` : ""}</span>
-            </Box>
-            <Box
-              as="button"
-              type="button"
-              onClick={clearChat}
-              display="inline-flex"
-              alignItems="center"
-              gap={1.5}
-              sx={{ _hover: { color: "var(--foreground)" } }}
-            >
-              <IconNew />
-              <span>Новый диалог</span>
-            </Box>
-            <Box
-              as="button"
-              type="button"
-              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-              aria-label={theme === "light" ? "Тёмная тема" : "Светлая тема"}
-              sx={{ _hover: { color: "var(--foreground)" } }}
-            >
-              ★
-            </Box>
-            <Link href="/dashboard" style={{ color: "inherit" }}>
-              <Box as="span" sx={{ _hover: { color: "var(--foreground)" } }}>В кабинет</Box>
-            </Link>
-          </Flex>
-        </Flex>
-      </Box>
-
       <Box flex="1" display="flex" flexDirection="column" alignItems="center" w="100%" py={4} px={4}>
         <Container
           maxW="720px"
@@ -392,7 +342,7 @@ export default function ChatPage() {
           flex="1"
           display="flex"
           flexDirection="column"
-          maxH="calc(100vh - 140px)"
+          maxH="calc(100vh - 100px)"
           px={{ base: 3, md: 6 }}
         >
 
@@ -472,7 +422,7 @@ export default function ChatPage() {
             onDragLeave={onDragLeave}
             onDrop={onDrop}
           >
-            {/* Селектор модели — белая карточка вверху панели */}
+            {/* Строка: селектор модели + История + Новый диалог */}
             <Box p={4} flexShrink={0} position="relative">
               {loadingModels ? (
                 <Flex align="center" gap={2}>
@@ -480,7 +430,7 @@ export default function ChatPage() {
                   <Text fontSize="14px" color="var(--foreground-muted)">Загрузка моделей...</Text>
                 </Flex>
               ) : (
-                <>
+                <Flex align="center" gap={3} flexWrap="wrap">
                   <Flex
                     align="center"
                     gap={3}
@@ -490,6 +440,8 @@ export default function ChatPage() {
                     bg="var(--chat-card-bg)"
                     cursor="pointer"
                     onClick={() => setModelSelectOpen((o) => !o)}
+                    flex={1}
+                    minW="200px"
                     sx={{ _hover: { borderColor: "#2563eb" } }}
                   >
                     <Box as="span" fontSize="20px" color="#2563eb">⚡</Box>
@@ -501,42 +453,68 @@ export default function ChatPage() {
                     </Box>
                     <Box as="span" fontSize="12px" color="var(--foreground-muted)" transform={modelSelectOpen ? "rotate(180deg)" : undefined} transition="transform 0.2s">▼</Box>
                   </Flex>
-                  {modelSelectOpen && (
-                    <>
-                      <Box position="fixed" inset={0} zIndex={9} onClick={() => setModelSelectOpen(false)} />
+                  <Flex align="center" gap={3} color="var(--foreground-muted)" fontSize="14px">
+                    <Box
+                      as="button"
+                      type="button"
+                      onClick={() => setShowHistory((v) => !v)}
+                      display="inline-flex"
+                      alignItems="center"
+                      gap={1.5}
+                      sx={{ _hover: { color: "var(--foreground)" } }}
+                    >
+                      <IconHistory />
+                      <span>История{savedDialogs.length > 0 ? ` ${savedDialogs.length}` : ""}</span>
+                    </Box>
+                    <Box
+                      as="button"
+                      type="button"
+                      onClick={clearChat}
+                      display="inline-flex"
+                      alignItems="center"
+                      gap={1.5}
+                      sx={{ _hover: { color: "var(--foreground)" } }}
+                    >
+                      <IconNew />
+                      <span>Новый диалог</span>
+                    </Box>
+                  </Flex>
+                </Flex>
+              )}
+              {!loadingModels && modelSelectOpen && (
+                <>
+                  <Box position="fixed" inset={0} zIndex={9} onClick={() => setModelSelectOpen(false)} />
+                  <Box
+                    position="absolute"
+                    top="100%"
+                    left={4}
+                    right={4}
+                    mt={1}
+                    py={1}
+                    borderRadius="8px"
+                    bg="var(--chat-card-bg)"
+                    border="1px solid var(--chat-card-border)"
+                    boxShadow="lg"
+                    zIndex={10}
+                    maxH="240px"
+                    overflowY="auto"
+                  >
+                    {models.map((m) => (
                       <Box
-                        position="absolute"
-                        top="100%"
-                        left={4}
-                        right={4}
-                        mt={1}
-                        py={1}
-                        borderRadius="8px"
-                        bg="var(--chat-card-bg)"
-                        border="1px solid var(--chat-card-border)"
-                        boxShadow="lg"
-                        zIndex={10}
-                        maxH="240px"
-                        overflowY="auto"
+                        key={m.model_name}
+                        px={3}
+                        py={2}
+                        cursor="pointer"
+                        onClick={() => {
+                          setSelectedModel(m.model_name);
+                          setModelSelectOpen(false);
+                        }}
+                        sx={{ _hover: { bg: "var(--chat-history-item-hover)" } }}
                       >
-                        {models.map((m) => (
-                          <Box
-                            key={m.model_name}
-                            px={3}
-                            py={2}
-                            cursor="pointer"
-                            onClick={() => {
-                              setSelectedModel(m.model_name);
-                              setModelSelectOpen(false);
-                            }}
-                            sx={{ _hover: { bg: "var(--chat-history-item-hover)" } }}
-                          >
-                            <Text fontSize="14px" fontWeight="500" color="var(--foreground)">{m.model_name}</Text>
-                          </Box>
-                        ))}
+                        <Text fontSize="14px" fontWeight="500" color="var(--foreground)">{m.model_name}</Text>
                       </Box>
-                    </>
-                  )}
+                    ))}
+                  </Box>
                 </>
               )}
               {attachedFiles.length > 0 && (
