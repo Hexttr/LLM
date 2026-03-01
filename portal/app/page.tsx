@@ -12,6 +12,7 @@ import {
   Spinner,
 } from "@chakra-ui/react";
 import Link from "next/link";
+import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
 
 interface ModelItem {
@@ -30,28 +31,31 @@ interface TierData {
 
 const TIER_META: Record<
   string,
-  { accent: string; bg: string; border: string; badge: string; desc: string }
+  { accent: string; bg: string; border: string; badge: string; desc: string; image: string }
 > = {
   free: {
     accent: "#059669",
     bg: "linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.04) 100%)",
     border: "#10b981",
-    badge: "Бесплатно",
+    badge: "Самые доступные модели",
     desc: "Для теста, обучения и лёгких задач. Лимиты по запросам в минуту.",
+    image: "/images/catalog-free.png",
   },
   daily: {
     accent: "#1d4ed8",
     bg: "linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(29, 78, 216, 0.04) 100%)",
     border: "#2563eb",
-    badge: "На каждый день",
+    badge: "Умеренные траты",
     desc: "Умеренная цена, баланс качества и скорости для рутины и поддержки.",
+    image: "/images/catalog-daily.png",
   },
   top: {
     accent: "#6d28d9",
     bg: "linear-gradient(135deg, rgba(124, 58, 237, 0.08) 0%, rgba(109, 40, 217, 0.04) 100%)",
     border: "#7c3aed",
-    badge: "Топ",
+    badge: "Максимальное качество",
     desc: "Максимальное качество: сложные рассуждения, код, длинный контекст.",
+    image: "/images/catalog-top.png",
   },
 };
 
@@ -137,23 +141,32 @@ function TierCard({
         background: isSelected ? meta.bg : "#ffffff",
       }}
     >
+      <Box position="relative" w="100%" h="120px" bg={meta.bg} overflow="hidden">
+        <Image
+          src={meta.image}
+          alt=""
+          fill
+          sizes="(max-width: 768px) 100vw, 33vw"
+          style={{ objectFit: "cover", objectPosition: "center" }}
+        />
+      </Box>
       <Box px={5} py={4}>
-        <Flex align="center" gap={2} flexWrap="wrap" mb={2}>
-          <Heading size="md" color="#111827" fontSize="1.15rem" fontWeight="800">
-            {tier.title}
-          </Heading>
-          <Box
-            px={2}
-            py={0.5}
-            borderRadius="full"
-            fontSize="xs"
-            fontWeight="600"
-            color={meta.accent}
-            bg={`${meta.accent}20`}
-          >
-            {meta.badge}
-          </Box>
-        </Flex>
+        <Heading size="md" color="#111827" fontSize="1.15rem" fontWeight="800" mb={2}>
+          {tier.title}
+        </Heading>
+        <Box
+          display="inline-block"
+          px={2.5}
+          py={1}
+          borderRadius="8px"
+          fontSize="xs"
+          fontWeight="600"
+          color={meta.accent}
+          bg={`${meta.accent}18`}
+          mb={2}
+        >
+          {meta.badge}
+        </Box>
         <Text color="#4b5563" fontSize="xs" lineHeight="1.5" noOfLines={2}>
           {meta.desc}
         </Text>
