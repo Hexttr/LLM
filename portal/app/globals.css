@@ -53,8 +53,10 @@ a {
   --chat-card-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
   --chat-bubble-user-bg: #2563eb;
   --chat-bubble-user-color: #ffffff;
-  --chat-bubble-assistant-bg: #f1f5f9;
-  --chat-bubble-assistant-color: #1e293b;
+  --chat-bubble-user-border: #1d4ed8;
+  --chat-bubble-assistant-bg: #e2e8f0;
+  --chat-bubble-assistant-color: #0f172a;
+  --chat-bubble-assistant-border: #cbd5e1;
   --chat-bubble-error-bg: #fef2f2;
   --chat-bubble-error-color: #b91c1c;
   --chat-bubble-error-border: #fecaca;
@@ -99,10 +101,12 @@ a {
   --chat-card-bg: #1e293b;
   --chat-card-border: #334155;
   --chat-card-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
-  --chat-bubble-user-bg: #2563eb;
+  --chat-bubble-user-bg: #1d4ed8;
   --chat-bubble-user-color: #ffffff;
+  --chat-bubble-user-border: #1e40af;
   --chat-bubble-assistant-bg: #334155;
   --chat-bubble-assistant-color: #e2e8f0;
+  --chat-bubble-assistant-border: #475569;
   --chat-bubble-error-bg: #450a0a;
   --chat-bubble-error-color: #fca5a5;
   --chat-bubble-error-border: #7f1d1d;

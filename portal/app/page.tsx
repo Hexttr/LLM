@@ -217,23 +217,56 @@ export default function Home() {
         pb={{ base: 14, md: 20 }}
       >
         <Container maxW="1200px" w="100%" mx="auto" px={4}>
-          <Box textAlign="center" maxW="600px" mx="auto">
+          <Box textAlign="center" maxW="640px" mx="auto">
+            {/* Пилл: Без VPN · Рублёвый счёт · Старт за 5 минут */}
+            <Flex
+              justify="center"
+              align="center"
+              gap={2}
+              mb={6}
+            >
+              <Box
+                display="inline-flex"
+                alignItems="center"
+                gap={2}
+                px={4}
+                py={2}
+                borderRadius="full"
+                bg="rgba(37, 99, 235, 0.12)"
+                color="#1d4ed8"
+                fontSize="sm"
+                fontWeight="600"
+              >
+                <Box as="span" fontSize="16px" lineHeight={1} aria-hidden>
+                  ✦
+                </Box>
+                <Text as="span">Без VPN · Рублёвый счёт · Старт за 5 минут</Text>
+              </Box>
+            </Flex>
+
+            {/* Заголовок: Все модели ИИ / В одном месте */}
             <Heading
               size="2xl"
-              color="#0f172a"
-              fontSize={{ base: "1.75rem", md: "2.25rem" }}
+              fontSize={{ base: "2rem", md: "2.75rem" }}
               fontWeight="800"
               letterSpacing="-0.03em"
-              lineHeight="1.25"
-              mb={3}
-              textShadow="0 1px 2px rgba(255,255,255,0.8)"
+              lineHeight="1.2"
+              mb={4}
             >
-              Пользуйся всеми моделями ИИ без VPN
+              <Text as="span" color="#0f172a" display="block">
+                Все модели ИИ
+              </Text>
+              <Text as="span" color="#2563eb" display="block">
+                В одном месте
+              </Text>
             </Heading>
+
             <Text fontSize="lg" color="#475569" lineHeight="1.6" mb={8} fontWeight="500">
-              Общий рублёвый счёт и старт за 5 минут.
+              Единый доступ к GPT, Claude, Gemini, Llama, Mixtral и другим моделям. Общий рублёвый счёт и прозрачная тарификация.
             </Text>
-            <Flex gap={3} justify="center" flexWrap="wrap">
+
+            {/* Кнопки */}
+            <Flex gap={3} justify="center" flexWrap="wrap" mb={12}>
               <Link href="/register">
                 <Button
                   size="lg"
@@ -247,10 +280,10 @@ export default function Home() {
                   _hover={{ bg: "#1d4ed8" }}
                   boxShadow="0 2px 8px rgba(37, 99, 235, 0.35)"
                 >
-                  Начать бесплатно
+                  Начать бесплатно →
                 </Button>
               </Link>
-              <Link href="/login">
+              <Link href="#catalog">
                 <Button
                   size="lg"
                   variant="outline"
@@ -260,31 +293,61 @@ export default function Home() {
                   fontWeight="600"
                   borderRadius="10px"
                   borderWidth="2px"
-                  borderColor="#cbd5e1"
+                  borderColor="#e2e8f0"
                   color="#334155"
-                  _hover={{ bg: "#f1f5f9", borderColor: "#94a3b8" }}
+                  bg="white"
+                  _hover={{ bg: "#f8fafc", borderColor: "#cbd5e1" }}
                 >
-                  Войти
+                  Посмотреть тарифы
                 </Button>
               </Link>
+            </Flex>
+
+            {/* Статистика */}
+            <Flex justify="center" gap={{ base: 8, md: 12 }} flexWrap="wrap">
+              <Box textAlign="center">
+                <Text fontSize="2xl" fontWeight="800" color="#0f172a" lineHeight="1.2">
+                  30+
+                </Text>
+                <Text fontSize="sm" color="#64748b" fontWeight="500">
+                  моделей
+                </Text>
+              </Box>
+              <Box textAlign="center">
+                <Text fontSize="2xl" fontWeight="800" color="#0f172a" lineHeight="1.2">
+                  5 сек
+                </Text>
+                <Text fontSize="sm" color="#64748b" fontWeight="500">
+                  на старт
+                </Text>
+              </Box>
+              <Box textAlign="center">
+                <Text fontSize="2xl" fontWeight="800" color="#0f172a" lineHeight="1.2">
+                  0 ₽
+                </Text>
+                <Text fontSize="sm" color="#64748b" fontWeight="500">
+                  бесплатный тир
+                </Text>
+              </Box>
             </Flex>
           </Box>
         </Container>
       </Box>
 
       {/* Каталог моделей */}
-      <Container maxW="1200px" w="100%" mx="auto" py={{ base: 12, md: 16 }} px={4}>
-        <Heading
-          size="lg"
-          textAlign="center"
-          color="#0f172a"
-          fontSize="1.625rem"
-          fontWeight="800"
-          letterSpacing="-0.02em"
-          mb={2}
-        >
-          Каталог моделей
-        </Heading>
+      <Box id="catalog">
+        <Container maxW="1200px" w="100%" mx="auto" py={{ base: 12, md: 16 }} px={4}>
+          <Heading
+            size="lg"
+            textAlign="center"
+            color="#0f172a"
+            fontSize="1.625rem"
+            fontWeight="800"
+            letterSpacing="-0.02em"
+            mb={2}
+          >
+            Каталог моделей
+          </Heading>
         <Text textAlign="center" color="#64748b" fontSize="sm" mb={10}>
           Выберите категорию — ниже отобразятся модели. Клик по модели откроет чат.
         </Text>
@@ -406,6 +469,7 @@ export default function Home() {
           </Link>
         </Box>
       </Container>
+      </Box>
     </Box>
   );
 }
