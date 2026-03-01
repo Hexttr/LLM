@@ -23,9 +23,19 @@ const EXAMPLE_PROMPTS = [
 
 const STORAGE_KEY = "portal_chat_dialogs";
 const MAX_SAVED = 30;
+const FOLDER_CONTEXT_MAX_CHARS = 35_000;
+const TEXT_EXTENSIONS = new Set([
+  ".txt", ".md", ".json", ".ts", ".tsx", ".js", ".jsx", ".css", ".html", ".xml",
+  ".py", ".rb", ".go", ".rs", ".java", ".kt", ".c", ".cpp", ".h", ".cs", ".yaml", ".yml", ".env", ".sh", ".bat",
+]);
 
 interface Model {
   model_name: string;
+}
+
+interface FileContext {
+  name: string;
+  content: string;
 }
 
 interface ChatMessage {
@@ -72,11 +82,20 @@ export default function ChatPage() {
   const [loadingModels, setLoadingModels] = useState(true);
   const [authChecked, setAuthChecked] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [folderFiles, setFolderFiles] = useState<FileContext[]>([]);
+  const [folderName, setFolderName] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const folderInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setSavedDialogs(loadSavedDialogs());
+  }, []);
+
+  // Устанавливаем webkitdirectory через DOM, чтобы React не ругался и браузер открывал выбор папки
+  useEffect(() => {
+    const el = folderInputRef.current;
+    if (el) el.setAttribute("webkitdirectory", "");
   }, []);
 
   useEffect(() => {
@@ -105,20 +124,34 @@ export default function ChatPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const buildFolderContext = (): string => {
+    if (folderFiles.length === 0) return "";
+    let out = "Контекст из выбранной папки (файлы для справки):\n\n";
+    let total = out.length;
+    for (const f of folderFiles) {
+      const block = `--- ${f.name} ---\n${f.content}\n\n`;
+      if (total + block.length > FOLDER_CONTEXT_MAX_CHARS) break;
+      out += block;
+      total += block.length;
+    }
+    return out;
+  };
+
   const send = async () => {
     const text = input.trim();
     if (!text || !selectedModel) return;
 
-    const userMessage: ChatMessage = { role: "user", content: text };
-    setMessages((prev) => [...prev, userMessage]);
+    const contextBlock = buildFolderContext();
+    const userContent = contextBlock ? `${contextBlock}\n--- Вопрос пользователя ---\n\n${text}` : text;
+
+    const userMessage: ChatMessage = { role: "user", content: userContent };
+    setMessages((prev) => [...prev, { role: "user", content: text }]);
     setInput("");
     setLoading(true);
 
     try {
-      const historyPlusNew = [...messages, userMessage].map((m) => ({
-        role: m.role,
-        content: m.content,
-      }));
+      const historyForApi = messages.map((m) => ({ role: m.role, content: m.content }));
+      historyForApi.push({ role: "user", content: userContent });
 
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -126,7 +159,7 @@ export default function ChatPage() {
         credentials: "include",
         body: JSON.stringify({
           model: selectedModel,
-          messages: historyPlusNew,
+          messages: historyForApi,
         }),
       });
       const data = await res.json();
@@ -188,6 +221,44 @@ export default function ChatPage() {
   const formatDate = (ts: number) => {
     const d = new Date(ts);
     return d.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  };
+
+  const readFileAsText = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(String(r.result ?? ""));
+      r.onerror = () => reject(new Error("Не удалось прочитать файл"));
+      r.readAsText(file, "utf-8");
+    });
+
+  const onFolderSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files?.length) return;
+    const list: FileContext[] = [];
+    let totalChars = 0;
+    const basePath = files[0]?.webkitRelativePath?.split("/")[0] ?? "Папка";
+    setFolderName(basePath);
+    for (let i = 0; i < files.length && totalChars < FOLDER_CONTEXT_MAX_CHARS; i++) {
+      const file = files[i];
+      const ext = file.name.slice(file.name.lastIndexOf(".")).toLowerCase();
+      if (!TEXT_EXTENSIONS.has(ext) && ext !== "") continue;
+      try {
+        const content = await readFileAsText(file);
+        const name = file.webkitRelativePath || file.name;
+        list.push({ name, content });
+        totalChars += content.length;
+      } catch {
+        // skip unreadable
+      }
+    }
+    setFolderFiles(list);
+    e.target.value = "";
+  };
+
+  const clearFolder = () => {
+    setFolderFiles([]);
+    setFolderName(null);
+    if (folderInputRef.current) folderInputRef.current.value = "";
   };
 
   const checkAuth = useCallback(async () => {
@@ -362,11 +433,11 @@ export default function ChatPage() {
             overflow="hidden"
             transition="background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease"
           >
-            {/* Выбор модели */}
+            {/* Выбор модели и папки */}
             <Flex
               p={4}
               borderBottom="1px solid var(--chat-card-border)"
-              gap={3}
+              gap={4}
               align="center"
               flexShrink={0}
               flexWrap="wrap"
@@ -398,6 +469,37 @@ export default function ChatPage() {
                     </option>
                   ))}
                 </select>
+              )}
+              <Box flex="1" minW={0} />
+              <input
+                ref={folderInputRef}
+                type="file"
+                multiple
+                style={{ display: "none" }}
+                onChange={onFolderSelected}
+              />
+              {folderFiles.length === 0 ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => folderInputRef.current?.click()}
+                  sx={{
+                    borderColor: "var(--chat-card-border)",
+                    color: "var(--foreground-muted)",
+                    _hover: { bg: "var(--chat-history-item-hover)", borderColor: "var(--chat-model-label)" },
+                  }}
+                >
+                  Выбрать папку для контекста
+                </Button>
+              ) : (
+                <Flex align="center" gap={2} flexWrap="wrap">
+                  <Text fontSize="13px" color="var(--foreground-muted)">
+                    Папка: {folderName}, {folderFiles.length} файлов
+                  </Text>
+                  <Button size="xs" variant="ghost" color="var(--foreground-subtle)" onClick={clearFolder}>
+                    Очистить
+                  </Button>
+                </Flex>
               )}
             </Flex>
 
@@ -443,10 +545,11 @@ export default function ChatPage() {
 
               {messages.map((msg, i) => {
                 const isError = msg.role === "assistant" && msg.content.startsWith("Ошибка:");
+                const isUser = msg.role === "user";
                 return (
                   <Box
                     key={i}
-                    alignSelf={msg.role === "user" ? "flex-end" : "flex-start"}
+                    alignSelf={isUser ? "flex-end" : "flex-start"}
                     maxW="88%"
                     px={4}
                     py={3}
@@ -454,22 +557,28 @@ export default function ChatPage() {
                     fontSize="15px"
                     lineHeight="1.6"
                     whiteSpace="pre-wrap"
-                    sx={{
-                      bg: msg.role === "user"
+                    border="1px solid"
+                    boxShadow="0 1px 3px rgba(0,0,0,0.08)"
+                    style={{
+                      backgroundColor: isUser
                         ? "var(--chat-bubble-user-bg)"
                         : isError
                           ? "var(--chat-bubble-error-bg)"
                           : "var(--chat-bubble-assistant-bg)",
-                      color: msg.role === "user"
+                      color: isUser
                         ? "var(--chat-bubble-user-color)"
                         : isError
                           ? "var(--chat-bubble-error-color)"
                           : "var(--chat-bubble-assistant-color)",
-                      border: isError ? "1px solid var(--chat-bubble-error-border)" : undefined,
+                      borderColor: isError
+                        ? "var(--chat-bubble-error-border)"
+                        : isUser
+                          ? "var(--chat-bubble-user-border)"
+                          : "var(--chat-bubble-assistant-border)",
                     }}
                   >
                     <Text fontSize="11px" fontWeight="600" opacity={0.9} mb={1.5}>
-                      {msg.role === "user" ? "Вы" : "Модель"}
+                      {isUser ? "Вы" : "Модель"}
                     </Text>
                     {msg.content}
                   </Box>
