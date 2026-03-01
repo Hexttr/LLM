@@ -453,15 +453,18 @@ export default function ChatPage() {
                     </Box>
                     <Box as="span" fontSize="12px" color="var(--foreground-muted)" flexShrink={0} transform={modelSelectOpen ? "rotate(180deg)" : undefined} transition="transform 0.2s">▼</Box>
                   </Flex>
-                  <Flex align="center" justify="flex-end" gap={4} color="var(--foreground-muted)" fontSize="14px" flex="1" minW={0}>
+                  <Flex align="center" justify="flex-end" gap={6} color="var(--foreground-muted)" fontSize="14px" flex="1" minW={0}>
                     <Box
                       as="button"
                       type="button"
                       onClick={() => setShowHistory((v) => !v)}
                       display="inline-flex"
                       alignItems="center"
-                      gap={1.5}
-                      sx={{ _hover: { color: "var(--foreground)" } }}
+                      gap={2}
+                      py={2}
+                      px={1}
+                      borderRadius="8px"
+                      sx={{ _hover: { color: "var(--foreground)", bg: "var(--chat-history-item-hover)" } }}
                     >
                       <IconHistory />
                       <span>История{savedDialogs.length > 0 ? ` ${savedDialogs.length}` : ""}</span>
@@ -472,8 +475,11 @@ export default function ChatPage() {
                       onClick={clearChat}
                       display="inline-flex"
                       alignItems="center"
-                      gap={1.5}
-                      sx={{ _hover: { color: "var(--foreground)" } }}
+                      gap={2}
+                      py={2}
+                      px={1}
+                      borderRadius="8px"
+                      sx={{ _hover: { color: "var(--foreground)", bg: "var(--chat-history-item-hover)" } }}
                     >
                       <IconNew />
                       <span>Новый диалог</span>
