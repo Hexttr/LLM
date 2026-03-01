@@ -18,6 +18,16 @@ model_list:
   #     model: anthropic/claude-3-5-sonnet-20241022
   #     api_key: os.environ/ANTHROPIC_API_KEY
 
+  # Groq — бесплатный tier, ключ: https://console.groq.com
+  - model_name: groq-llama
+    litellm_params:
+      model: groq/llama-3.1-8b-instant
+      api_key: os.environ/GROQ_API_KEY
+  - model_name: groq-llama-70b
+    litellm_params:
+      model: groq/llama-3.1-70b-versatile
+      api_key: os.environ/GROQ_API_KEY
+
   # Заглушка для локальной проверки (без реального провайдера)
   - model_name: echo
     litellm_params:

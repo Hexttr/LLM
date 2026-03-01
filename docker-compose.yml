@@ -45,5 +45,24 @@ services:
       timeout: 5s
       retries: 10
 
+  portal:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - ./portal:/app
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://llmproxy:dbpassword9090@db:5432/litellm
+      JWT_SECRET: portal-jwt-secret
+      LITELLM_PROXY_URL: http://litellm:4000
+      LITELLM_MASTER_KEY: sk-1234
+    command: sh -c "npm install && npx prisma generate && npm run dev -- -H 0.0.0.0"
+    depends_on:
+      db:
+        condition: service_healthy
+      litellm:
+        condition: service_healthy
+
 volumes:
   postgres_data:

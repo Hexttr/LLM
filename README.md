@@ -46,6 +46,22 @@
      -d '{"model": "echo", "messages": [{"role": "user", "content": "Hello"}]}'
    ```
 
+## Портал (лендинг + регистрация + ЛК)
+
+В каталоге `portal/` — Next.js приложение: лендинг со списком моделей, регистрация, вход, личный кабинет (API-ключ, использование).
+
+**Запуск портала (после того как Docker с LiteLLM и Postgres уже запущен):**
+
+```bash
+cd portal
+cp .env.local.example .env.local   # при необходимости отредактировать
+npx prisma migrate deploy          # один раз: создать таблицу users в БД
+npm install
+npm run dev
+```
+
+Портал: http://localhost:3000. Подробнее — [portal/README.md](portal/README.md).
+
 ## Структура проекта
 
 | Файл / каталог | Назначение |
@@ -53,7 +69,9 @@
 | `config.yaml` | Модели, лимиты и настройки LiteLLM Proxy |
 | `docker-compose.yml` | LiteLLM + Postgres для локального запуска |
 | `.env.example` | Шаблон переменных окружения (копировать в `.env`) |
+| `portal/` | Next.js портал: лендинг, регистрация, ЛК |
 | `ARCHITECTURE_AND_RECOMMENDATIONS.md` | Архитектура, сравнение с OpenRouter, хостинг |
+| `PLAN.md` | План реализации портала |
 
 ## Добавление моделей
 
