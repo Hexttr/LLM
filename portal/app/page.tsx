@@ -28,38 +28,80 @@ interface TierData {
   imageModels: ModelItem[];
 }
 
-function ModelCard({ item }: { item: ModelItem }) {
+const TIER_META: Record<
+  string,
+  { accent: string; bg: string; border: string; badge: string; desc: string }
+> = {
+  free: {
+    accent: "#059669",
+    bg: "linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.04) 100%)",
+    border: "#10b981",
+    badge: "Бесплатно",
+    desc: "Для теста, обучения и лёгких задач. Лимиты по запросам в минуту.",
+  },
+  daily: {
+    accent: "#1d4ed8",
+    bg: "linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(29, 78, 216, 0.04) 100%)",
+    border: "#2563eb",
+    badge: "На каждый день",
+    desc: "Умеренная цена, баланс качества и скорости для рутины и поддержки.",
+  },
+  top: {
+    accent: "#6d28d9",
+    bg: "linear-gradient(135deg, rgba(124, 58, 237, 0.08) 0%, rgba(109, 40, 217, 0.04) 100%)",
+    border: "#7c3aed",
+    badge: "Топ",
+    desc: "Максимальное качество: сложные рассуждения, код, длинный контекст.",
+  },
+};
+
+function ModelCard({
+  item,
+  accentColor,
+}: {
+  item: ModelItem;
+  accentColor: string;
+}) {
   return (
     <Box
-      p={3}
-      borderRadius="10px"
+      p={4}
+      borderRadius="12px"
       border="1px solid #e5e7eb"
       bg="#ffffff"
-      transition="border-color 0.2s, box-shadow 0.2s"
-      _hover={{ borderColor: "#93c5fd", boxShadow: "0 2px 8px rgba(37, 99, 235, 0.08)" }}
+      boxShadow="0 1px 3px rgba(0,0,0,0.04)"
+      transition="all 0.2s ease"
+      _hover={{
+        borderColor: accentColor,
+        boxShadow: `0 4px 12px ${accentColor}20`,
+        transform: "translateY(-1px)",
+      }}
     >
-      <Text fontWeight="600" color="#111827" fontSize="0.9375rem">
+      <Text fontWeight="700" color="#111827" fontSize="0.9375rem" lineHeight="1.3">
         {item.name}
       </Text>
       {item.provider && (
-        <Text fontSize="xs" color="#6b7280" mt={0.5}>
+        <Box
+          mt={2}
+          display="inline-block"
+          px={2}
+          py={0.5}
+          borderRadius="6px"
+          bg="#f3f4f6"
+          fontSize="xs"
+          color="#6b7280"
+          fontWeight="500"
+        >
           {item.provider}
-        </Text>
+        </Box>
       )}
       {item.description && (
-        <Text fontSize="xs" color="#4b5563" mt={0.5} lineHeight="1.4">
+        <Text fontSize="xs" color="#4b5563" mt={2} lineHeight="1.45">
           {item.description}
         </Text>
       )}
     </Box>
   );
 }
-
-const TIER_STYLE: Record<string, { border: string; bg: string; accent: string }> = {
-  free: { border: "#10b981", bg: "rgba(16, 185, 129, 0.06)", accent: "#059669" },
-  daily: { border: "#2563eb", bg: "rgba(37, 99, 235, 0.06)", accent: "#1d4ed8" },
-  top: { border: "#7c3aed", bg: "rgba(124, 58, 237, 0.06)", accent: "#6d28d9" },
-};
 
 function TierSection({
   tier,
@@ -70,18 +112,18 @@ function TierSection({
   isOpen: boolean;
   onToggle: () => void;
 }) {
-  const style = TIER_STYLE[tier.id] ?? TIER_STYLE.daily;
+  const meta = TIER_META[tier.id] ?? TIER_META.daily;
 
   return (
     <Box
-      mb={4}
-      borderRadius="14px"
-      border="1px solid"
-      borderColor={style.border}
+      mb={6}
+      borderRadius="16px"
       overflow="hidden"
       bg="#ffffff"
-      boxShadow={isOpen ? "0 4px 20px rgba(0,0,0,0.06)" : "0 1px 3px rgba(0,0,0,0.04)"}
-      transition="box-shadow 0.2s"
+      boxShadow={isOpen ? "0 8px 30px rgba(0,0,0,0.08)" : "0 2px 8px rgba(0,0,0,0.04)"}
+      border="1px solid #e5e7eb"
+      transition="box-shadow 0.25s ease, border-color 0.2s"
+      _hover={{ borderColor: isOpen ? meta.border : "#d1d5db" }}
     >
       <Box
         as="button"
@@ -89,73 +131,106 @@ function TierSection({
         width="100%"
         textAlign="left"
         onClick={onToggle}
-        px={6}
-        py={4}
-        bg={style.bg}
-        borderBottom={isOpen ? "1px solid" : "none"}
-        borderColor="#e5e7eb"
         cursor="pointer"
-        _hover={{ bg: "rgba(0,0,0,0.02)" }}
-        _focusVisible={{ outline: "2px solid #2563eb", outlineOffset: "2px" }}
-        transition="background 0.15s"
+        _focusVisible={{ outline: "2px solid", outlineColor: meta.accent, outlineOffset: "2px" }}
+        transition="background 0.2s"
+        sx={{
+          background: meta.bg,
+          borderLeft: "4px solid",
+          borderLeftColor: meta.border,
+        }}
       >
-        <Flex align="center" justify="space-between" gap={4}>
-          <Box>
-            <Heading size="md" color="#111827" fontSize="1.25rem" fontWeight="700">
-              {tier.title}
-            </Heading>
-            <Text color="#6b7280" fontSize="sm" mt={1}>
-              {tier.subtitle}
-            </Text>
-          </Box>
-          <Box
-            as="span"
-            sx={{
-              display: "inline-block",
-              width: "20px",
-              height: "20px",
-              borderRight: "2px solid #9ca3af",
-              borderBottom: "2px solid #9ca3af",
-              transform: isOpen ? "rotate(-135deg)" : "rotate(45deg)",
-              transition: "transform 0.25s ease",
-            }}
-          />
-        </Flex>
+        <Box px={6} py={5}>
+          <Flex align="flex-start" justify="space-between" gap={4} flexWrap="wrap">
+            <Box flex={1} minW={0}>
+              <Flex align="center" gap={3} mb={2}>
+                <Heading size="md" color="#111827" fontSize="1.35rem" fontWeight="800">
+                  {tier.title}
+                </Heading>
+                <Box
+                  px={2.5}
+                  py={0.5}
+                  borderRadius="full"
+                  fontSize="xs"
+                  fontWeight="600"
+                  color={meta.accent}
+                  bg={`${meta.accent}18`}
+                >
+                  {meta.badge}
+                </Box>
+              </Flex>
+              <Text color="#4b5563" fontSize="sm" lineHeight="1.5" maxW="560px">
+                {meta.desc}
+              </Text>
+              <Text color="#6b7280" fontSize="xs" mt={1}>
+                {tier.subtitle}
+              </Text>
+            </Box>
+            <Flex
+              align="center"
+              justify="center"
+              w="40px"
+              h="40px"
+              borderRadius="10px"
+              bg="white"
+              boxShadow="0 1px 3px rgba(0,0,0,0.08)"
+              sx={{
+                "& > span": {
+                  display: "inline-block",
+                  width: "10px",
+                  height: "10px",
+                  borderRight: "2px solid #6b7280",
+                  borderBottom: "2px solid #6b7280",
+                  transform: isOpen ? "rotate(-135deg) translateY(2px)" : "rotate(45deg)",
+                  transition: "transform 0.25s ease",
+                },
+              }}
+            >
+              <span />
+            </Flex>
+          </Flex>
+        </Box>
       </Box>
 
       <Box
         sx={{
           display: "grid",
           gridTemplateRows: isOpen ? "1fr" : "0fr",
-          transition: "grid-template-rows 0.3s ease",
+          transition: "grid-template-rows 0.35s ease",
         }}
       >
         <Box overflow="hidden">
-          <Box p={6} pt={5} borderTop="none">
-            <SimpleGrid columns={{ base: 1, lg: 2 }} gap={8}>
+          <Box
+            px={6}
+            pb={6}
+            pt={2}
+            borderTop="1px solid #e5e7eb"
+            bg="#fafbfc"
+          >
+            <SimpleGrid columns={{ base: 1, lg: 2 }} gap={8} mt={4}>
               <Box>
                 <Flex align="center" gap={2} mb={4}>
-                  <Box w="4px" h="20px" borderRadius="full" bg="#2563eb" />
-                  <Text fontWeight="600" color="#374151" fontSize="0.9375rem">
+                  <Box w="4px" h="22px" borderRadius="full" bg="#2563eb" />
+                  <Text fontWeight="700" color="#374151" fontSize="0.9375rem">
                     Текстовые модели
                   </Text>
                 </Flex>
-                <SimpleGrid columns={{ base: 1, sm: 2 }} gap={3}>
+                <SimpleGrid columns={{ base: 1, sm: 2 }} gap={4}>
                   {tier.textModels.map((m) => (
-                    <ModelCard key={m.name} item={m} />
+                    <ModelCard key={m.name} item={m} accentColor={meta.accent} />
                   ))}
                 </SimpleGrid>
               </Box>
               <Box>
                 <Flex align="center" gap={2} mb={4}>
-                  <Box w="4px" h="20px" borderRadius="full" bg="#f59e0b" />
-                  <Text fontWeight="600" color="#374151" fontSize="0.9375rem">
+                  <Box w="4px" h="22px" borderRadius="full" bg="#f59e0b" />
+                  <Text fontWeight="700" color="#374151" fontSize="0.9375rem">
                     Генерация изображений
                   </Text>
                 </Flex>
-                <SimpleGrid columns={{ base: 1, sm: 2 }} gap={3}>
+                <SimpleGrid columns={{ base: 1, sm: 2 }} gap={4}>
                   {tier.imageModels.map((m) => (
-                    <ModelCard key={m.name} item={m} />
+                    <ModelCard key={m.name} item={m} accentColor={meta.accent} />
                   ))}
                 </SimpleGrid>
               </Box>
@@ -274,7 +349,7 @@ export default function Home() {
           Каталог моделей
         </Heading>
         <Text textAlign="center" color="#64748b" fontSize="sm" mb={10}>
-          Три уровня доступа — клик по заголовку, чтобы раскрыть список
+          Нажмите на раздел, чтобы раскрыть и просмотреть все модели
         </Text>
 
         {loading && (
