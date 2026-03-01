@@ -192,52 +192,38 @@ function TierSection({
         </Box>
       </Box>
 
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateRows: isOpen ? "1fr" : "0fr",
-          transition: "grid-template-rows 0.35s ease",
-        }}
-      >
-        <Box overflow="hidden">
-          <Box
-            px={6}
-            pb={6}
-            pt={2}
-            borderTop="1px solid #e5e7eb"
-            bg="#fafbfc"
-          >
-            <SimpleGrid columns={{ base: 1, lg: 2 }} gap={8} mt={4}>
-              <Box>
-                <Flex align="center" gap={2} mb={4}>
-                  <Box w="4px" h="22px" borderRadius="full" bg="#2563eb" />
-                  <Text fontWeight="700" color="#374151" fontSize="0.9375rem">
-                    Текстовые модели
-                  </Text>
-                </Flex>
-                <SimpleGrid columns={{ base: 1, sm: 2 }} gap={4}>
-                  {tier.textModels.map((m) => (
-                    <ModelCard key={m.name} item={m} accentColor={meta.accent} />
-                  ))}
-                </SimpleGrid>
-              </Box>
-              <Box>
-                <Flex align="center" gap={2} mb={4}>
-                  <Box w="4px" h="22px" borderRadius="full" bg="#f59e0b" />
-                  <Text fontWeight="700" color="#374151" fontSize="0.9375rem">
-                    Генерация изображений
-                  </Text>
-                </Flex>
-                <SimpleGrid columns={{ base: 1, sm: 2 }} gap={4}>
-                  {tier.imageModels.map((m) => (
-                    <ModelCard key={m.name} item={m} accentColor={meta.accent} />
-                  ))}
-                </SimpleGrid>
-              </Box>
-            </SimpleGrid>
-          </Box>
+      {isOpen && (
+        <Box borderTop="1px solid #e5e7eb" bg="#fafbfc" px={6} pb={6} pt={4}>
+          <SimpleGrid columns={{ base: 1, lg: 2 }} gap={8} mt={2}>
+            <Box>
+              <Flex align="center" gap={2} mb={4}>
+                <Box w="4px" h="22px" borderRadius="full" bg="#2563eb" />
+                <Text fontWeight="700" color="#374151" fontSize="0.9375rem">
+                  Текстовые модели
+                </Text>
+              </Flex>
+              <SimpleGrid columns={{ base: 1, sm: 2 }} gap={4}>
+                {tier.textModels.map((m) => (
+                  <ModelCard key={m.name} item={m} accentColor={meta.accent} />
+                ))}
+              </SimpleGrid>
+            </Box>
+            <Box>
+              <Flex align="center" gap={2} mb={4}>
+                <Box w="4px" h="22px" borderRadius="full" bg="#f59e0b" />
+                <Text fontWeight="700" color="#374151" fontSize="0.9375rem">
+                  Генерация изображений
+                </Text>
+              </Flex>
+              <SimpleGrid columns={{ base: 1, sm: 2 }} gap={4}>
+                {tier.imageModels.map((m) => (
+                  <ModelCard key={m.name} item={m} accentColor={meta.accent} />
+                ))}
+              </SimpleGrid>
+            </Box>
+          </SimpleGrid>
         </Box>
-      </Box>
+      )}
     </Box>
   );
 }
