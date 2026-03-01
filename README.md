@@ -43,7 +43,7 @@
    curl -X POST "http://localhost:4000/chat/completions" \
      -H "Authorization: Bearer <ваш-ключ>" \
      -H "Content-Type: application/json" \
-     -d '{"model": "echo", "messages": [{"role": "user", "content": "Hello"}]}'
+     -d '{"model": "groq-llama", "messages": [{"role": "user", "content": "Hello"}]}'
    ```
 
 ## Портал (лендинг + регистрация + ЛК)

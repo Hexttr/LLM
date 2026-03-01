@@ -10,8 +10,7 @@
       { "name": "Gemini 2.0 Flash", "provider": "Google AI Studio", "description": "Бесплатный тир, лимиты RPD" },
       { "name": "Gemini 2.5 Flash-Lite", "provider": "Google AI Studio", "description": "Больше лимитов" },
       { "name": "Llama 3.x, Mistral 7B, Qwen", "provider": "Cloudflare Workers AI", "description": "~10k нейронов/день" },
-      { "name": "Модели из каталога", "provider": "HuggingFace", "description": "Ограниченные бесплатные кредиты" },
-      { "name": "Локальные модели", "provider": "Ollama", "description": "Свой сервер — без облачной платы" }
+      { "name": "Модели из каталога", "provider": "HuggingFace", "description": "Ограниченные бесплатные кредиты" }
     ],
     "imageModels": [
       { "name": "Генерация изображений", "provider": "по мере подключения", "description": "Бесплатные провайдеры (Gemini и др.)" }

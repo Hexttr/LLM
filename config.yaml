@@ -28,12 +28,6 @@ model_list:
       model: groq/llama-3.1-70b-versatile
       api_key: os.environ/GROQ_API_KEY
 
-  # Заглушка для локальной проверки (без реального провайдера)
-  - model_name: echo
-    litellm_params:
-      model: openai/echo
-      api_key: fake-key
-
 litellm_settings:
   set_verbose: false
   # callbacks: ["lago"]  # раскомментировать при настройке биллинга
