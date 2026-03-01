@@ -29,12 +29,13 @@ export function Navbar() {
     <Box
       as="header"
       w="100%"
-      borderBottom="1px solid #e8ecf1"
-      bg="rgba(255,255,255,0.92)"
+      borderBottom="1px solid var(--navbar-border)"
+      bg="var(--navbar-bg)"
       backdropFilter="saturate(180%) blur(12px)"
       position="sticky"
       top={0}
       zIndex={50}
+      transition="background-color 0.2s ease, border-color 0.2s ease"
     >
       <Flex maxW="1200px" w="100%" mx="auto" px={{ base: 4, md: 6 }} py={3} align="center" justify="space-between" gap={4}>
         <Link href="/" style={{ display: "inline-block" }}>
@@ -45,10 +46,10 @@ export function Navbar() {
             w="5.25rem"
             textAlign="left"
           >
-            <Text as="span" display="block" fontWeight="800" fontSize={{ base: "1.35rem", md: "1.5rem" }} color="#111827">
+            <Text as="span" display="block" fontWeight="800" fontSize={{ base: "1.35rem", md: "1.5rem" }} color="var(--navbar-logo)">
               21day
             </Text>
-            <Text as="span" display="block" fontWeight="600" fontSize={{ base: "0.95rem", md: "1.05rem" }} color="#6b7280">
+            <Text as="span" display="block" fontWeight="600" fontSize={{ base: "0.95rem", md: "1.05rem" }} color="var(--navbar-logo-sub)">
               club
             </Text>
           </Box>
@@ -61,12 +62,14 @@ export function Navbar() {
                 <Button
                   size="sm"
                   variant="outline"
-                  borderColor="#d1d5db"
-                  color="#374151"
                   fontWeight="600"
                   borderRadius="8px"
-                  _hover={{ bg: "#f9fafb", borderColor: "#9ca3af" }}
                   px={4}
+                  sx={{
+                    borderColor: "var(--card-border)",
+                    color: "var(--foreground-muted)",
+                    _hover: { bg: "var(--card-bg)", borderColor: "var(--foreground-subtle)" },
+                  }}
                 >
                   Вход
                 </Button>
@@ -95,28 +98,32 @@ export function Navbar() {
                   size="sm"
                   colorPalette="blue"
                   variant="outline"
-                  borderColor="#2563eb"
-                  color="#2563eb"
                   fontWeight="600"
                   borderRadius="8px"
-                  _hover={{ bg: "#eff6ff" }}
                   px={4}
+                  sx={{
+                    borderColor: "#2563eb",
+                    color: "#2563eb",
+                    _hover: { bg: "rgba(37, 99, 235, 0.1)" },
+                  }}
                 >
                   Кабинет
                 </Button>
               </Link>
               <Button
-                  size="sm"
-                  variant="ghost"
-                  color="#6b7280"
-                  fontWeight="500"
-                  borderRadius="8px"
-                  _hover={{ bg: "#f3f4f6", color: "#374151" }}
-                  px={4}
-                  onClick={handleLogout}
-                >
-                  Выйти
-                </Button>
+                size="sm"
+                variant="ghost"
+                fontWeight="500"
+                borderRadius="8px"
+                px={4}
+                onClick={handleLogout}
+                sx={{
+                  color: "var(--foreground-muted)",
+                  _hover: { bg: "var(--card-bg)", color: "var(--foreground)" },
+                }}
+              >
+                Выйти
+              </Button>
             </>
           )}
         </Flex>

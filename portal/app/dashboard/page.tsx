@@ -17,6 +17,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
+import { useTheme, type Theme } from "@/lib/theme-context";
 
 interface Me {
   user: {
@@ -46,6 +47,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [copyOk, setCopyOk] = useState(false);
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     Promise.all([
@@ -78,7 +80,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <Box minH="100vh" bg="gray.50">
+      <Box minH="100vh" bg="var(--page-bg)">
         <Navbar />
         <Flex justify="center" align="center" minH="50vh">
           <Spinner />
@@ -89,10 +91,10 @@ export default function DashboardPage() {
 
   if (!me?.user) {
     return (
-      <Box minH="100vh" bg="gray.50">
+      <Box minH="100vh" bg="var(--page-bg)">
         <Navbar />
         <Container maxW="md" py={12}>
-          <Text>Требуется вход.</Text>
+          <Text color="var(--foreground)">Требуется вход.</Text>
           <Link href="/login">
             <Button mt={4} colorScheme="blue">
               Войти
@@ -104,16 +106,41 @@ export default function DashboardPage() {
   }
 
   return (
-    <Box minH="100vh" bg="gray.50">
+    <Box minH="100vh" bg="var(--page-bg)">
       <Navbar />
       <Container maxW="800px" py={8}>
-        <Flex justify="space-between" align="center" mb={8}>
-          <Heading size="lg">Личный кабинет</Heading>
-          <Button size="sm" variant="outline" onClick={logout}>
-            Выйти
-          </Button>
+        <Flex justify="space-between" align="center" mb={6} flexWrap="wrap" gap={3}>
+          <Heading size="lg" color="var(--foreground)">
+            Личный кабинет
+          </Heading>
+          <Flex gap={2} align="center">
+            <Text fontSize="sm" color="var(--foreground-muted)" fontWeight="500">
+              Тема:
+            </Text>
+            <Button
+              size="sm"
+              variant={theme === "light" ? "solid" : "outline"}
+              colorScheme="blue"
+              onClick={() => setTheme("light" as Theme)}
+              borderRadius="8px"
+            >
+              Светлая
+            </Button>
+            <Button
+              size="sm"
+              variant={theme === "dark" ? "solid" : "outline"}
+              colorScheme="blue"
+              onClick={() => setTheme("dark" as Theme)}
+              borderRadius="8px"
+            >
+              Тёмная
+            </Button>
+            <Button size="sm" variant="outline" onClick={logout} borderRadius="8px" ml={2}>
+              Выйти
+            </Button>
+          </Flex>
         </Flex>
-        <Text color="gray.600" mb={4}>
+        <Text color="var(--foreground-muted)" mb={4}>
           {me.user.email}
         </Text>
         <Link href="/chat" style={{ display: "inline-block", marginBottom: "1.5rem" }}>
@@ -122,12 +149,12 @@ export default function DashboardPage() {
           </Button>
         </Link>
 
-        <Card.Root mb={6}>
+        <Card.Root mb={6} bg="var(--card-bg)" borderColor="var(--card-border)">
           <Card.Header>
-            <Heading size="md">API-ключ</Heading>
+            <Heading size="md" color="var(--foreground)">API-ключ</Heading>
           </Card.Header>
           <Card.Body>
-            <Text fontSize="sm" color="gray.600" mb={2}>
+            <Text fontSize="sm" color="var(--foreground-muted)" mb={2}>
               Используйте этот ключ в заголовке Authorization: Bearer &lt;ключ&gt;
             </Text>
             <Flex gap={2}>
@@ -150,17 +177,17 @@ export default function DashboardPage() {
           </Card.Body>
         </Card.Root>
 
-        <Card.Root mb={6}>
+        <Card.Root mb={6} bg="var(--card-bg)" borderColor="var(--card-border)">
           <Card.Header>
-            <Heading size="md">Использование</Heading>
+            <Heading size="md" color="var(--foreground)">Использование</Heading>
           </Card.Header>
           <Card.Body>
-            <Text>
+            <Text color="var(--foreground)">
               Расход (spend): <strong>${usage?.spend?.toFixed(6) ?? "0.000000"}</strong>
             </Text>
             {usage?.keys?.length ? (
               <Box mt={2}>
-                <Text fontSize="sm" color="gray.600">
+                <Text fontSize="sm" color="var(--foreground-muted)">
                   По ключам: {usage.keys.map((k) => `$${k.spend?.toFixed(6) ?? "0"}`).join(", ")}
                 </Text>
               </Box>
@@ -169,12 +196,12 @@ export default function DashboardPage() {
         </Card.Root>
 
         {(limits?.rpmLimit != null || limits?.tpmLimit != null || limits?.maxBudget != null) && (
-          <Card.Root>
+          <Card.Root bg="var(--card-bg)" borderColor="var(--card-border)">
             <Card.Header>
-              <Heading size="md">Лимиты</Heading>
+              <Heading size="md" color="var(--foreground)">Лимиты</Heading>
             </Card.Header>
             <Card.Body>
-              <Box as="ul" listStyleType="none" p={0} m={0}>
+              <Box as="ul" listStyleType="none" p={0} m={0} color="var(--foreground)">
                 {limits.rpmLimit != null && (
                   <Text as="li" mb={1}>
                     Запросов в минуту: <strong>{limits.rpmLimit}</strong>

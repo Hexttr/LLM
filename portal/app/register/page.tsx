@@ -31,7 +31,8 @@ export default function RegisterPage() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, website: honeypot, _ready: canSubmit ? "1" : "" }),
+        credentials: "include",
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password, website: honeypot, _ready: canSubmit ? "1" : "" }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -39,6 +40,7 @@ export default function RegisterPage() {
         return;
       }
       setMessage({ type: "success", text: "Регистрация успешна" });
+      await new Promise((r) => setTimeout(r, 100));
       router.push("/dashboard");
       router.refresh();
     } catch {

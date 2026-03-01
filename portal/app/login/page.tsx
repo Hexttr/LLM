@@ -21,7 +21,8 @@ export default function LoginPage() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        credentials: "include",
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -29,6 +30,8 @@ export default function LoginPage() {
         return;
       }
       setMessage({ type: "success", text: "Вход выполнен" });
+      // Даём браузеру время установить cookie перед переходом
+      await new Promise((r) => setTimeout(r, 100));
       router.push("/dashboard");
       router.refresh();
     } catch {
