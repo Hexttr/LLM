@@ -23,7 +23,7 @@ const EXAMPLE_PROMPTS = [
 
 const STORAGE_KEY = "portal_chat_dialogs";
 const MAX_SAVED = 30;
-const FOLDER_CONTEXT_MAX_CHARS = 35_000;
+const ATTACHED_MAX_CHARS = 35_000;
 const TEXT_EXTENSIONS = new Set([
   ".txt", ".md", ".json", ".ts", ".tsx", ".js", ".jsx", ".css", ".html", ".xml",
   ".py", ".rb", ".go", ".rs", ".java", ".kt", ".c", ".cpp", ".h", ".cs", ".yaml", ".yml", ".env", ".sh", ".bat",
@@ -82,8 +82,8 @@ export default function ChatPage() {
   const [loadingModels, setLoadingModels] = useState(true);
   const [authChecked, setAuthChecked] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
-  const [folderFiles, setFolderFiles] = useState<FileContext[]>([]);
-  const [folderName, setFolderName] = useState<string | null>(null);
+  const [attachedFiles, setAttachedFiles] = useState<FileContext[]>([]);
+  const [isDragOver, setIsDragOver] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -118,13 +118,13 @@ export default function ChatPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const buildFolderContext = (): string => {
-    if (folderFiles.length === 0) return "";
-    let out = "Контекст из выбранной папки (файлы для справки):\n\n";
+  const buildAttachedContext = (): string => {
+    if (attachedFiles.length === 0) return "";
+    let out = "Контекст из прикреплённых файлов:\n\n";
     let total = out.length;
-    for (const f of folderFiles) {
+    for (const f of attachedFiles) {
       const block = `--- ${f.name} ---\n${f.content}\n\n`;
-      if (total + block.length > FOLDER_CONTEXT_MAX_CHARS) break;
+      if (total + block.length > ATTACHED_MAX_CHARS) break;
       out += block;
       total += block.length;
     }
@@ -135,7 +135,7 @@ export default function ChatPage() {
     const text = input.trim();
     if (!text || !selectedModel) return;
 
-    const contextBlock = buildFolderContext();
+    const contextBlock = buildAttachedContext();
     const userContent = contextBlock ? `${contextBlock}\n--- Вопрос пользователя ---\n\n${text}` : text;
 
     const userMessage: ChatMessage = { role: "user", content: userContent };
@@ -168,6 +168,7 @@ export default function ChatPage() {
 
       const content = data.choices?.[0]?.message?.content ?? "(нет ответа)";
       setMessages((prev) => [...prev, { role: "assistant", content }]);
+      setAttachedFiles([]);
     } catch (e) {
       setMessages((prev) => [
         ...prev,
@@ -225,51 +226,45 @@ export default function ChatPage() {
       r.readAsText(file, "utf-8");
     });
 
-  const onFolderSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
+  const processDroppedFiles = async (files: FileList | null) => {
     if (!files?.length) return;
     const list: FileContext[] = [];
     let totalChars = 0;
-    const basePath = files[0]?.webkitRelativePath?.split("/")[0] ?? "Папка";
-    setFolderName(basePath);
-    for (let i = 0; i < files.length && totalChars < FOLDER_CONTEXT_MAX_CHARS; i++) {
+    for (let i = 0; i < files.length && totalChars < ATTACHED_MAX_CHARS; i++) {
       const file = files[i];
       const ext = file.name.slice(file.name.lastIndexOf(".")).toLowerCase();
       if (!TEXT_EXTENSIONS.has(ext) && ext !== "") continue;
       try {
         const content = await readFileAsText(file);
-        const name = file.webkitRelativePath || file.name;
-        list.push({ name, content });
+        list.push({ name: file.name, content });
         totalChars += content.length;
       } catch {
         // skip unreadable
       }
     }
-    setFolderFiles(list);
-    e.target.value = "";
+    setAttachedFiles((prev) => (list.length ? [...prev, ...list] : prev));
   };
 
-  const clearFolder = () => {
-    setFolderFiles([]);
-    setFolderName(null);
+  const onDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
   };
 
-  const openFolderPicker = () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.multiple = true;
-    input.setAttribute("webkitdirectory", "");
-    input.style.display = "none";
-    input.onchange = (e) => {
-      const files = (e.target as HTMLInputElement).files;
-      if (files?.length) onFolderSelected({ target: { files } } as React.ChangeEvent<HTMLInputElement>);
-      input.remove();
-    };
-    document.body.appendChild(input);
-    input.click();
-    // Если пользователь закрыл диалог без выбора, убираем input
-    setTimeout(() => input.remove(), 1000);
+  const onDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
   };
+
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+    processDroppedFiles(e.dataTransfer.files);
+  };
+
+  const clearAttached = () => setAttachedFiles([]);
 
   const checkAuth = useCallback(async () => {
     const res = await fetch("/api/me", { credentials: "include" });
@@ -430,7 +425,7 @@ export default function ChatPage() {
             </Box>
           )}
 
-          {/* Карточка чата */}
+          {/* Карточка чата (зона drag & drop) */}
           <Box
             flex="1"
             display="flex"
@@ -442,7 +437,29 @@ export default function ChatPage() {
             boxShadow="var(--chat-card-shadow)"
             overflow="hidden"
             transition="background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease"
+            position="relative"
+            onDragOver={onDragOver}
+            onDragLeave={onDragLeave}
+            onDrop={onDrop}
           >
+            {isDragOver && (
+              <Box
+                position="absolute"
+                inset={0}
+                zIndex={10}
+                bg="var(--input-focus-ring)"
+                border="2px dashed var(--input-focus-border)"
+                borderRadius="16px"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                pointerEvents="none"
+              >
+                <Text fontWeight="600" color="var(--foreground)" fontSize="lg">
+                  Отпустите файлы для прикрепления
+                </Text>
+              </Box>
+            )}
             {/* Выбор модели и папки */}
             <Flex
               p={4}
@@ -480,32 +497,13 @@ export default function ChatPage() {
                   ))}
                 </select>
               )}
-              <Box flex="1" minW={0} />
-              {folderFiles.length === 0 ? (
-                <Flex align="center" gap={2} flexWrap="wrap">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={openFolderPicker}
-                    sx={{
-                      borderColor: "var(--chat-card-border)",
-                      color: "var(--foreground-muted)",
-                      _hover: { bg: "var(--chat-history-item-hover)", borderColor: "var(--chat-model-label)" },
-                    }}
-                  >
-                    Выбрать папку для контекста
-                  </Button>
-                  <Text fontSize="11px" color="var(--foreground-subtle)" whiteSpace="nowrap" title="В диалоге выберите папку (не файл) и нажмите «Открыть»">
-                    (папку → «Открыть»)
-                  </Text>
-                </Flex>
-              ) : (
+              {attachedFiles.length > 0 && (
                 <Flex align="center" gap={2} flexWrap="wrap">
                   <Text fontSize="13px" color="var(--foreground-muted)">
-                    Папка: {folderName}, {folderFiles.length} файлов
+                    Прикреплено: {attachedFiles.map((f) => f.name).join(", ")}
                   </Text>
-                  <Button size="xs" variant="ghost" color="var(--foreground-subtle)" onClick={clearFolder}>
-                    Очистить
+                  <Button size="xs" variant="ghost" color="var(--foreground-subtle)" onClick={clearAttached}>
+                    Убрать
                   </Button>
                 </Flex>
               )}
@@ -522,8 +520,11 @@ export default function ChatPage() {
             >
               {messages.length === 0 && !loading && (
                 <Flex flexDirection="column" align="center" justify="center" py={12} textAlign="center">
-                  <Text color="var(--chat-empty-text)" fontSize="15px" mb={5} maxW="340px" lineHeight="1.6">
+                  <Text color="var(--chat-empty-text)" fontSize="15px" mb={3} maxW="340px" lineHeight="1.6">
                     Напишите сообщение — диалог сохраняет контекст. При «Новый диалог» текущий чат попадёт в сохранённые.
+                  </Text>
+                  <Text color="var(--foreground-subtle)" fontSize="13px" mb={5}>
+                    Можно перетащить файлы в чат — их содержимое будет отправлено с сообщением.
                   </Text>
                   <Flex flexWrap="wrap" gap={2} justify="center">
                     {EXAMPLE_PROMPTS.map((prompt) => (
