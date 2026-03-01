@@ -23,9 +23,12 @@ export function Navbar() {
     router.refresh();
   };
 
+  const showLoggedOut = isLoggedIn !== true;
+
   return (
     <Box
       as="header"
+      w="100%"
       borderBottom="1px solid #e8ecf1"
       bg="rgba(255,255,255,0.92)"
       backdropFilter="saturate(180%) blur(12px)"
@@ -33,10 +36,16 @@ export function Navbar() {
       top={0}
       zIndex={50}
     >
-      <Flex maxW="1200px" mx="auto" px={{ base: 4, md: 6 }} py={3} align="center" justify="space-between" gap={4}>
-        <Link href="/" style={{ display: "block" }}>
-          <Box lineHeight="1.15" letterSpacing="-0.03em">
-            <Text as="span" fontWeight="800" fontSize={{ base: "1.35rem", md: "1.5rem" }} color="#111827">
+      <Flex maxW="1200px" w="100%" mx="auto" px={{ base: 4, md: 6 }} py={3} align="center" justify="space-between" gap={4}>
+        <Link href="/" style={{ display: "inline-block" }}>
+          <Box
+            lineHeight="1.15"
+            letterSpacing="-0.03em"
+            minW="5.25rem"
+            w="5.25rem"
+            textAlign="left"
+          >
+            <Text as="span" display="block" fontWeight="800" fontSize={{ base: "1.35rem", md: "1.5rem" }} color="#111827">
               21day
             </Text>
             <Text as="span" display="block" fontWeight="600" fontSize={{ base: "0.95rem", md: "1.05rem" }} color="#6b7280">
@@ -60,7 +69,7 @@ export function Navbar() {
             </Button>
           </Link>
 
-          {isLoggedIn === false && (
+          {showLoggedOut && (
             <>
               <Link href="/login">
                 <Button
@@ -93,7 +102,7 @@ export function Navbar() {
             </>
           )}
 
-          {isLoggedIn === true && (
+          {!showLoggedOut && (
             <>
               <Link href="/dashboard">
                 <Button

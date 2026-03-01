@@ -194,17 +194,18 @@ export default function Home() {
   };
 
   return (
-    <Box minH="100vh" bg="#fafbfc">
+    <Box minH="100vh" w="100%" bg="#fafbfc">
       <Navbar />
 
       {/* Hero */}
       <Box
+        w="100%"
         bg="linear-gradient(180deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%)"
         borderBottom="1px solid #e2e8f0"
         pt={{ base: 10, md: 14 }}
         pb={{ base: 12, md: 16 }}
       >
-        <Container maxW="1200px" px={4}>
+        <Container maxW="1200px" w="100%" mx="auto" px={4}>
           <Box textAlign="center" maxW="640px" mx="auto">
             <Heading
               size="2xl"
@@ -261,7 +262,7 @@ export default function Home() {
       </Box>
 
       {/* Каталог моделей */}
-      <Container maxW="1200px" py={{ base: 10, md: 14 }} px={4}>
+      <Container maxW="1200px" w="100%" mx="auto" py={{ base: 10, md: 14 }} px={4}>
         <Heading
           size="lg"
           textAlign="center"
