@@ -32,9 +32,17 @@ interface Usage {
   keys: { key?: string; spend?: number }[];
 }
 
+interface Limits {
+  maxBudget: number | null;
+  rpmLimit: number | null;
+  tpmLimit: number | null;
+  budgetDuration: string | null;
+}
+
 export default function DashboardPage() {
   const [me, setMe] = useState<Me | null>(null);
   const [usage, setUsage] = useState<Usage | null>(null);
+  const [limits, setLimits] = useState<Limits | null>(null);
   const [loading, setLoading] = useState(true);
   const [copyOk, setCopyOk] = useState(false);
   const router = useRouter();
@@ -43,13 +51,15 @@ export default function DashboardPage() {
     Promise.all([
       fetch("/api/me", { credentials: "include" }).then((r) => r.json()),
       fetch("/api/usage", { credentials: "include" }).then((r) => r.json()),
-    ]).then(([meData, usageData]) => {
+      fetch("/api/limits", { credentials: "include" }).then((r) => r.json()),
+    ]).then(([meData, usageData, limitsData]) => {
       if (meData.error && meData.error === "Unauthorized") {
         router.push("/login");
         return;
       }
       setMe(meData.user ? { user: meData.user } : null);
       setUsage(usageData.spend !== undefined ? usageData : null);
+      setLimits(limitsData.error ? null : limitsData);
     }).catch(() => setMe(null)).finally(() => setLoading(false));
   }, [router]);
 
@@ -140,7 +150,7 @@ export default function DashboardPage() {
           </Card.Body>
         </Card.Root>
 
-        <Card.Root>
+        <Card.Root mb={6}>
           <Card.Header>
             <Heading size="md">Использование</Heading>
           </Card.Header>
@@ -157,6 +167,34 @@ export default function DashboardPage() {
             ) : null}
           </Card.Body>
         </Card.Root>
+
+        {(limits?.rpmLimit != null || limits?.tpmLimit != null || limits?.maxBudget != null) && (
+          <Card.Root>
+            <Card.Header>
+              <Heading size="md">Лимиты</Heading>
+            </Card.Header>
+            <Card.Body>
+              <Box as="ul" listStyleType="none" p={0} m={0}>
+                {limits.rpmLimit != null && (
+                  <Text as="li" mb={1}>
+                    Запросов в минуту: <strong>{limits.rpmLimit}</strong>
+                  </Text>
+                )}
+                {limits.tpmLimit != null && (
+                  <Text as="li" mb={1}>
+                    Токенов в минуту: <strong>{limits.tpmLimit.toLocaleString()}</strong>
+                  </Text>
+                )}
+                {limits.maxBudget != null && (
+                  <Text as="li" mb={1}>
+                    Бюджет: <strong>${limits.maxBudget}</strong>
+                    {limits.budgetDuration ? ` на ${limits.budgetDuration}` : ""}
+                  </Text>
+                )}
+              </Box>
+            </Card.Body>
+          </Card.Root>
+        )}
       </Container>
     </Box>
   );

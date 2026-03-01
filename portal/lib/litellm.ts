@@ -2,9 +2,26 @@ const getBase = () =>
   (process.env.LITELLM_PROXY_URL || "http://localhost:4000").replace(/\/$/, "");
 const getMasterKey = () => process.env.LITELLM_MASTER_KEY!;
 
-export async function createKey(userId: string, email?: string): Promise<string> {
-  const body: { user_id: string; metadata?: Record<string, string> } = { user_id: userId };
-  if (email) body.metadata = { user: email, user_email: email };
+export interface CreateKeyOptions {
+  email?: string;
+  /** Лимит бюджета в USD на ключ (например 0.5 для бесплатного тира) */
+  maxBudget?: number;
+  /** Запросов в минуту на ключ */
+  rpmLimit?: number;
+  /** Токенов в минуту на ключ */
+  tpmLimit?: number;
+  /** На какой период бюджет (например "30d", "1h") */
+  budgetDuration?: string;
+}
+
+export async function createKey(userId: string, options: CreateKeyOptions = {}): Promise<string> {
+  const body: Record<string, unknown> = { user_id: userId };
+  if (options.email) body.metadata = { user: options.email, user_email: options.email };
+  if (options.maxBudget != null) body.max_budget = options.maxBudget;
+  if (options.rpmLimit != null) body.rpm_limit = options.rpmLimit;
+  if (options.tpmLimit != null) body.tpm_limit = options.tpmLimit;
+  if (options.budgetDuration) body.budget_duration = options.budgetDuration;
+
   const res = await fetch(`${getBase()}/key/generate`, {
     method: "POST",
     headers: {

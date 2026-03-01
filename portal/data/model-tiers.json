@@ -1,0 +1,61 @@
+[
+  {
+    "id": "free",
+    "title": "Бесплатные модели",
+    "subtitle": "Супер дёшево или бесплатный тир: чат и базовая генерация",
+    "textModels": [
+      { "name": "Llama 3.1 8B / 70B", "provider": "Groq", "description": "Быстрый инференс, бесплатный тир" },
+      { "name": "Mixtral 8x7B", "provider": "Groq", "description": "Хорошее качество" },
+      { "name": "Gemma 2", "provider": "Groq", "description": "Лёгкие модели" },
+      { "name": "Gemini 2.0 Flash", "provider": "Google AI Studio", "description": "Бесплатный тир, лимиты RPD" },
+      { "name": "Gemini 2.5 Flash-Lite", "provider": "Google AI Studio", "description": "Больше лимитов" },
+      { "name": "Llama 3.x, Mistral 7B, Qwen", "provider": "Cloudflare Workers AI", "description": "~10k нейронов/день" },
+      { "name": "Модели из каталога", "provider": "HuggingFace", "description": "Ограниченные бесплатные кредиты" },
+      { "name": "Локальные модели", "provider": "Ollama", "description": "Свой сервер — без облачной платы" }
+    ],
+    "imageModels": [
+      { "name": "Генерация изображений", "provider": "по мере подключения", "description": "Бесплатные провайдеры (Gemini и др.)" }
+    ]
+  },
+  {
+    "id": "daily",
+    "title": "Модели на каждый день",
+    "subtitle": "Умеренная цена: баланс качества и стоимости для рутины и поддержки",
+    "textModels": [
+      { "name": "GPT-4o mini", "provider": "OpenAI", "description": "Дёшево, 128K контекст" },
+      { "name": "GPT-4.1-mini", "provider": "OpenAI", "description": "Обновлённый мини" },
+      { "name": "Claude Haiku 4.5", "provider": "Anthropic", "description": "Быстрый и недорогой" },
+      { "name": "Claude Sonnet 4.x", "provider": "Anthropic", "description": "Универсальная рабочая модель" },
+      { "name": "Gemini 2.5 Flash", "provider": "Google", "description": "Быстрый, хороший контекст" },
+      { "name": "Gemini 2.0 Flash", "provider": "Google", "description": "Стабильный" },
+      { "name": "DeepSeek V3 / R1", "provider": "DeepSeek", "description": "Сильный код, низкая цена" },
+      { "name": "Mistral Medium / Large", "provider": "Mistral", "description": "Хорошее качество" },
+      { "name": "Llama 3.1 70B", "provider": "Together / Fireworks", "description": "Мощная открытая модель" }
+    ],
+    "imageModels": [
+      { "name": "DALL·E 2", "provider": "OpenAI", "description": "Недорогая генерация изображений" },
+      { "name": "FLUX Schnell", "provider": "Replicate / Fal", "description": "Быстрая генерация по промпту" }
+    ]
+  },
+  {
+    "id": "top",
+    "title": "Топовые модели",
+    "subtitle": "Максимальное качество: сложные рассуждения, код, длинный контекст",
+    "textModels": [
+      { "name": "Claude Opus 4.5 / 4.6", "provider": "Anthropic", "description": "Флагман, длинный контекст" },
+      { "name": "GPT-4.1", "provider": "OpenAI", "description": "Флагман, 1M контекст" },
+      { "name": "GPT-5", "provider": "OpenAI", "description": "Новейший флагман" },
+      { "name": "o3 / o4", "provider": "OpenAI", "description": "Reasoning-модели" },
+      { "name": "Gemini 2.5 Pro", "provider": "Google", "description": "Топ Google, 1M контекст" },
+      { "name": "Gemini 3.x Pro", "provider": "Google", "description": "Следующее поколение" },
+      { "name": "Claude Sonnet 4.6", "provider": "Anthropic", "description": "Лучшее соотношение в топе" }
+    ],
+    "imageModels": [
+      { "name": "DALL·E 3", "provider": "OpenAI", "description": "Качество и композиция" },
+      { "name": "GPT Image 1", "provider": "OpenAI", "description": "Флагман изображений" },
+      { "name": "Imagen 3", "provider": "Google", "description": "Топ Google по картинкам" },
+      { "name": "FLUX Pro / Dev", "provider": "Replicate / Fal", "description": "Сильное следование промпту" },
+      { "name": "Recraft v3", "provider": "Recraft", "description": "Дизайн и иллюстрации" }
+    ]
+  }
+]

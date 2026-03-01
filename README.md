@@ -71,7 +71,14 @@ npm run dev
 | `.env.example` | Шаблон переменных окружения (копировать в `.env`) |
 | `portal/` | Next.js портал: лендинг, регистрация, ЛК |
 | `ARCHITECTURE_AND_RECOMMENDATIONS.md` | Архитектура, сравнение с OpenRouter, хостинг |
+| `RATE_LIMITS_AND_BUDGETS.md` | Лимиты на пользователя и глобальный бюджет (RPM, TPM, max_budget) |
 | `PLAN.md` | План реализации портала |
+
+## Лимиты и бюджеты
+
+Чтобы при большом числе пользователей не исчерпать бесплатный лимит провайдера, для каждого ключа можно задать лимиты: запросов в минуту (RPM), токенов в минуту (TPM) и бюджет в USD. Подробно — в [RATE_LIMITS_AND_BUDGETS.md](RATE_LIMITS_AND_BUDGETS.md).
+
+Кратко: в портале задайте переменные окружения (или в `docker-compose.yml` для сервиса `portal`): `DEFAULT_RPM_LIMIT`, `DEFAULT_TPM_LIMIT`, `DEFAULT_MAX_BUDGET`, `BUDGET_DURATION`. Новые пользователи будут получать ключи с этими лимитами. В `config.yaml` можно выставить глобальный `max_budget` на весь прокси.
 
 ## Добавление моделей
 

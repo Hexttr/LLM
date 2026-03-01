@@ -3,8 +3,8 @@ import { Providers } from "./providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "LLM API — доступ к моделям",
-  description: "Единый API для доступа к языковым моделям",
+  title: "21day club — единый API для языковых моделей",
+  description: "Один ключ — доступ к бесплатным и премиум LLM, генерация изображений. Регистрируйтесь и подключайте модели в свои приложения.",
 };
 
 export default function RootLayout({

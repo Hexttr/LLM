@@ -3,6 +3,15 @@ import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/auth";
 import { createKey } from "@/lib/litellm";
 
+function getKeyLimits() {
+  return {
+    maxBudget: process.env.DEFAULT_MAX_BUDGET ? parseFloat(process.env.DEFAULT_MAX_BUDGET) : undefined,
+    rpmLimit: process.env.DEFAULT_RPM_LIMIT ? parseInt(process.env.DEFAULT_RPM_LIMIT, 10) : undefined,
+    tpmLimit: process.env.DEFAULT_TPM_LIMIT ? parseInt(process.env.DEFAULT_TPM_LIMIT, 10) : undefined,
+    budgetDuration: process.env.BUDGET_DURATION || undefined,
+  };
+}
+
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as {
@@ -46,7 +55,14 @@ export async function POST(request: Request) {
       data: { email, passwordHash },
     });
 
-    const apiKey = await createKey(user.id, user.email);
+    const limits = getKeyLimits();
+    const apiKey = await createKey(user.id, {
+      email: user.email,
+      maxBudget: limits.maxBudget,
+      rpmLimit: limits.rpmLimit,
+      tpmLimit: limits.tpmLimit,
+      budgetDuration: limits.budgetDuration,
+    });
     await prisma.user.update({
       where: { id: user.id },
       data: { apiKey },

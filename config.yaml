@@ -41,3 +41,6 @@ litellm_settings:
 general_settings:
   master_key: os.environ/LITELLM_MASTER_KEY
   database_url: os.environ/DATABASE_URL
+  # Глобальный потолок на весь прокси (раскомментируйте и задайте сумму в USD и период)
+  # max_budget: 5
+  # budget_duration: "30d"
