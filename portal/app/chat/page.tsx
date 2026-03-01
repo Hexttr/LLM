@@ -16,6 +16,33 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
 import { useTheme } from "@/lib/theme-context";
 
+const iconSize = 18;
+const iconStyle = { width: iconSize, height: iconSize, flexShrink: 0 };
+
+function IconHistory() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={iconStyle}>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 6v6l4 2" />
+    </svg>
+  );
+}
+function IconNew() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={iconStyle}>
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  );
+}
+function IconPaperclip() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={iconStyle}>
+      <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+    </svg>
+  );
+}
+
 const SUGGESTION_CARDS = [
   { icon: "💡", title: "Объяснение", prompt: "Объясни простыми словами, как работает API" },
   { icon: "</>", title: "Код", prompt: "Напиши короткий пример кода на TypeScript" },
@@ -321,12 +348,25 @@ export default function ChatPage() {
               as="button"
               type="button"
               onClick={() => setShowHistory((v) => !v)}
+              display="inline-flex"
+              alignItems="center"
+              gap={1.5}
               sx={{ _hover: { color: "var(--foreground)" } }}
             >
-              История{savedDialogs.length > 0 ? ` ${savedDialogs.length}` : ""}
+              <IconHistory />
+              <span>История{savedDialogs.length > 0 ? ` ${savedDialogs.length}` : ""}</span>
             </Box>
-            <Box as="button" type="button" onClick={clearChat} sx={{ _hover: { color: "var(--foreground)" } }}>
-              Новый диалог
+            <Box
+              as="button"
+              type="button"
+              onClick={clearChat}
+              display="inline-flex"
+              alignItems="center"
+              gap={1.5}
+              sx={{ _hover: { color: "var(--foreground)" } }}
+            >
+              <IconNew />
+              <span>Новый диалог</span>
             </Box>
             <Box
               as="button"
@@ -550,15 +590,29 @@ export default function ChatPage() {
               )}
 
               {messages.length === 0 && !loading && (
-                <Flex flexDirection="column" align="center" justify="center" py={6} textAlign="center">
-                  <Box as="span" fontSize="40px" color="#2563eb" mb={3} opacity={0.9} lineHeight={1}>
-                    💬
-                  </Box>
-                  <Heading size="md" color="var(--foreground)" mb={2} fontWeight="600">
-                    Начните разговор
+                <Flex flexDirection="column" align="center" justify="center" py={8} textAlign="center">
+                  <Flex
+                    align="center"
+                    justify="center"
+                    w="72px"
+                    h="72px"
+                    borderRadius="full"
+                    bg="rgba(37, 99, 235, 0.12)"
+                    border="1px solid rgba(37, 99, 235, 0.25)"
+                    mb={4}
+                  >
+                    <Box as="span" fontSize="36px" color="#2563eb" lineHeight={1}>
+                      💬
+                    </Box>
+                  </Flex>
+                  <Heading size="lg" color="var(--foreground)" mb={2} fontWeight="700" fontSize="1.5rem">
+                    Начните разговор.
                   </Heading>
-                  <Text color="var(--chat-empty-text)" fontSize="14px" mb={5} maxW="360px" lineHeight="1.6">
+                  <Text color="var(--foreground)" fontSize="15px" mb={1} maxW="400px" lineHeight="1.5">
                     Напишите сообщение — диалог сохраняет контекст.
+                  </Text>
+                  <Text color="var(--foreground-subtle)" fontSize="14px" mb={6} maxW="400px" lineHeight="1.5">
+                    Можно перетащить файлы в чат — их содержимое будет отправлено с сообщением.
                   </Text>
                   <Box
                     display="grid"
@@ -567,6 +621,7 @@ export default function ChatPage() {
                     w="100%"
                     maxW="560px"
                     mx="auto"
+                    textAlign="left"
                   >
                     {SUGGESTION_CARDS.map((card, idx) => (
                       <Box
@@ -581,10 +636,8 @@ export default function ChatPage() {
                         bg="var(--chat-card-bg)"
                         cursor="pointer"
                         transition="all 0.2s"
-                        gridColumn={idx === 2 || idx === 3 ? undefined : { base: "1", md: "1 / -1" }}
-                        maxW={idx === 2 || idx === 3 ? undefined : { md: "320px" }}
-                        justifySelf={idx === 2 || idx === 3 ? undefined : "center"}
                         sx={{
+                          boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
                           _hover: {
                             borderColor: "#2563eb",
                             bg: "var(--chat-prompt-btn-hover-bg)",
@@ -592,9 +645,19 @@ export default function ChatPage() {
                           },
                         }}
                       >
-                        <Text fontSize="16px" mb={2}>{card.icon}</Text>
-                        <Text fontWeight="600" fontSize="14px" color="var(--foreground)" mb={1}>{card.title}</Text>
-                        <Text fontSize="13px" color="var(--foreground-muted)" lineHeight="1.4">{card.prompt}</Text>
+                        <Flex align="flex-start" gap={3}>
+                          <Box fontSize="20px" color="var(--foreground-muted)" lineHeight={1} mt="2px">
+                            {card.icon}
+                          </Box>
+                          <Box flex={1} minW={0}>
+                            <Text fontWeight="600" fontSize="14px" color="var(--foreground)" mb={1.5}>
+                              {card.title}
+                            </Text>
+                            <Text fontSize="13px" color="var(--foreground-muted)" lineHeight="1.4">
+                              {card.prompt}
+                            </Text>
+                          </Box>
+                        </Flex>
                       </Box>
                     ))}
                   </Box>
@@ -690,13 +753,14 @@ export default function ChatPage() {
             >
               <Flex align="flex-end" gap={2} mb={2}>
                 <Box
-                  as="span"
-                  fontSize="18px"
-                  color="var(--foreground-muted)"
                   flexShrink={0}
+                  color="var(--foreground-muted)"
                   title="Прикрепить файл"
+                  display="flex"
+                  alignItems="center"
+                  sx={{ _hover: { color: "var(--foreground)" } }}
                 >
-                  📎
+                  <IconPaperclip />
                 </Box>
                 <Textarea
                   ref={inputRef}
