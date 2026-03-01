@@ -1,7 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Box, Container, Flex, Heading, Text, Button, Textarea } from "@chakra-ui/react";
+import { useEffect, useState, useRef } from "react";
+import {
+  Box,
+  Container,
+  Flex,
+  Heading,
+  Text,
+  Button,
+  Textarea,
+} from "@chakra-ui/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
@@ -10,14 +18,19 @@ interface Model {
   model_name: string;
 }
 
+interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
 export default function ChatPage() {
   const [models, setModels] = useState<Model[]>([]);
   const [selectedModel, setSelectedModel] = useState("");
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingModels, setLoadingModels] = useState(true);
-  const [response, setResponse] = useState("");
-  const router = useRouter();
+  const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetch("/api/models")
@@ -35,38 +48,64 @@ export default function ChatPage() {
     if (models.length > 0 && !selectedModel) setSelectedModel(models[0].model_name);
   }, [models, selectedModel]);
 
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   const send = async () => {
     const text = input.trim();
     if (!text || !selectedModel) return;
+
+    const userMessage: ChatMessage = { role: "user", content: text };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
     setLoading(true);
-    setResponse("");
+
     try {
+      const historyPlusNew = [...messages, userMessage].map((m) => ({
+        role: m.role,
+        content: m.content,
+      }));
+
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
           model: selectedModel,
-          messages: [{ role: "user", content: text }],
+          messages: historyPlusNew,
         }),
       });
       const data = await res.json();
+
       if (!res.ok) {
-        setResponse(`Ошибка: ${data.error ?? res.status}`);
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: `Ошибка: ${data.error ?? res.status}` },
+        ]);
         return;
       }
+
       const content = data.choices?.[0]?.message?.content ?? "(нет ответа)";
-      setResponse(content);
+      setMessages((prev) => [...prev, { role: "assistant", content }]);
     } catch (e) {
-      setResponse(`Ошибка: ${e instanceof Error ? e.message : "Сеть"}`);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: `Ошибка: ${e instanceof Error ? e.message : "Сеть"}` },
+      ]);
     } finally {
       setLoading(false);
     }
   };
 
+  const clearChat = () => {
+    setMessages([]);
+  };
+
   const checkAuth = async () => {
     const res = await fetch("/api/me", { credentials: "include" });
-    if (!res.ok || !(await res.json()).user) router.push("/login");
+    const data = await res.json();
+    if (!res.ok || !data.user) router.push("/login");
   };
 
   useEffect(() => {
@@ -74,92 +113,128 @@ export default function ChatPage() {
   }, []);
 
   return (
-    <Box minH="100vh" bg="#f7fafc">
+    <Box minH="100vh" bg="#f7fafc" display="flex" flexDirection="column">
       <Navbar />
-      <Container maxW="800px" py={{ base: 6, md: 8 }} px={4}>
-        <Flex justify="space-between" align="center" mb={6}>
-          <Heading size="lg" color="#1a202c">
-            Попробовать модель
+      <Container maxW="800px" py={{ base: 4, md: 6 }} px={4} flex="1" display="flex" flexDirection="column" maxH="calc(100vh - 56px)">
+        <Flex justify="space-between" align="center" mb={4} flexShrink={0}>
+          <Heading size="lg" color="#1a202c" fontSize="1.25rem">
+            Чат с моделью
           </Heading>
-          <Link href="/dashboard">
-            <Button size="sm" variant="outline" borderColor="#cbd5e0">
-              В кабинет
+          <Flex gap={2}>
+            <Button
+              size="sm"
+              variant="outline"
+              borderColor="#cbd5e0"
+              onClick={clearChat}
+              disabled={messages.length === 0}
+            >
+              Новый диалог
             </Button>
-          </Link>
+            <Link href="/dashboard">
+              <Button size="sm" variant="outline" borderColor="#cbd5e0">
+                В кабинет
+              </Button>
+            </Link>
+          </Flex>
         </Flex>
 
         <Box
           className="portal-card"
-          p={6}
+          flex="1"
+          display="flex"
+          flexDirection="column"
+          minH={0}
           border="1px solid #e2e8f0"
           borderRadius="12px"
           bg="white"
           boxShadow="0 1px 3px rgba(0,0,0,0.06)"
         >
-          <Text mb={2} fontSize="14px" fontWeight="600" color="#2d3748">
-            Модель
-          </Text>
-          <select
-            value={selectedModel}
-            onChange={(e) => setSelectedModel(e.target.value)}
-            className="portal-input"
-            style={{ marginBottom: "1.25rem", cursor: "pointer" }}
-          >
-            {models.map((m) => (
-              <option key={m.model_name} value={m.model_name}>
-                {m.model_name}
-              </option>
-            ))}
-          </select>
+          {/* Модель */}
+          <Flex p={4} borderBottom="1px solid #e2e8f0" gap={3} align="center" flexShrink={0}>
+            <Text fontSize="14px" fontWeight="600" color="#2d3748">
+              Модель:
+            </Text>
+            <select
+              value={selectedModel}
+              onChange={(e) => setSelectedModel(e.target.value)}
+              className="portal-input"
+              style={{ width: "auto", minWidth: "180px", cursor: "pointer" }}
+            >
+              {models.map((m) => (
+                <option key={m.model_name} value={m.model_name}>
+                  {m.model_name}
+                </option>
+              ))}
+            </select>
+          </Flex>
 
-          <Text mb={2} fontSize="14px" fontWeight="600" color="#2d3748">
-            Сообщение
-          </Text>
-          <Textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Введите запрос..."
-            minH="120px"
-            mb={4}
-            border="1px solid #cbd5e0"
-            borderRadius="8px"
-            padding="12px"
-            fontSize="16px"
-            _focus={{ borderColor: "#3182ce", boxShadow: "0 0 0 2px rgba(49, 130, 206, 0.4)" }}
-          />
-
-          <Button
-            onClick={send}
-            colorScheme="blue"
-            size="lg"
-            loading={loading}
-            disabled={!input.trim() || !selectedModel}
-            mb={6}
-            borderRadius="8px"
-            fontWeight="600"
-          >
-            Отправить
-          </Button>
-
-          {response && (
-            <>
-              <Text mb={2} fontSize="14px" fontWeight="600" color="#2d3748">
-                Ответ
+          {/* Лента сообщений */}
+          <Box flex="1" overflowY="auto" p={4} display="flex" flexDirection="column" gap={4}>
+            {messages.length === 0 && (
+              <Text color="#718096" fontSize="14px" textAlign="center" py={8}>
+                Напишите сообщение — диалог сохраняет контекст, можно вести длинный разговор.
               </Text>
+            )}
+            {messages.map((msg, i) => (
               <Box
-                p={4}
-                borderRadius="8px"
-                bg="#f7fafc"
-                border="1px solid #e2e8f0"
-                whiteSpace="pre-wrap"
+                key={i}
+                alignSelf={msg.role === "user" ? "flex-end" : "flex-start"}
+                maxW="85%"
+                px={4}
+                py={3}
+                borderRadius="12px"
+                bg={msg.role === "user" ? "#3182ce" : "#edf2f7"}
+                color={msg.role === "user" ? "white" : "#1a202c"}
                 fontSize="15px"
-                color="#1a202c"
                 lineHeight="1.6"
+                whiteSpace="pre-wrap"
               >
-                {response}
+                <Text fontSize="11px" fontWeight="600" opacity={0.8} mb={1}>
+                  {msg.role === "user" ? "Вы" : "Модель"}
+                </Text>
+                {msg.content}
               </Box>
-            </>
-          )}
+            ))}
+            {loading && (
+              <Box alignSelf="flex-start" px={4} py={2} borderRadius="12px" bg="#edf2f7" color="#718096" fontSize="14px">
+                Печатает...
+              </Box>
+            )}
+            <div ref={bottomRef} />
+          </Box>
+
+          {/* Поле ввода */}
+          <Box p={4} borderTop="1px solid #e2e8f0" flexShrink={0}>
+            <Textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  send();
+                }
+              }}
+              placeholder="Сообщение... (Enter — отправить, Shift+Enter — новая строка)"
+              minH="80px"
+              mb={3}
+              border="1px solid #cbd5e0"
+              borderRadius="8px"
+              padding="12px"
+              fontSize="16px"
+              _focus={{ borderColor: "#3182ce", boxShadow: "0 0 0 2px rgba(49, 130, 206, 0.4)" }}
+            />
+            <Button
+              onClick={send}
+              colorScheme="blue"
+              size="lg"
+              loading={loading}
+              disabled={!input.trim() || !selectedModel}
+              borderRadius="8px"
+              fontWeight="600"
+            >
+              Отправить
+            </Button>
+          </Box>
         </Box>
       </Container>
     </Box>
